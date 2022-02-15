@@ -1,0 +1,332 @@
+{{#header}} {{^user}}
+<div class="container">
+  <div class="rightBar">
+    {{^isUserLogged}}
+    <style>
+      #introAd .video {
+        height: 192px;
+        width: 280px;
+        box-shadow: 0 0 3px rgba(0, 0, 0, 0.43);
+        -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, 0.43);
+        -moz-box-shadow: 0 0 3px rgba(0, 0, 0, 0.43);
+        background: url(/images/video.png) no-repeat center center;
+      }
+
+      #introAd .video > a {
+        display: block;
+        width: 280px;
+        height: 192px;
+        background: url(/images/video-play.png) no-repeat center center;
+        opacity: 0.6;
+      }
+
+      #introAd .video > a:hover {
+        opacity: 0.9;
+      }
+    </style>
+    <script>
+      /*<![CDATA[*/
+      function openVideo() {
+        openHtmlDialog(
+          '<iframe src="//player.vimeo.com/video/53666841?autoplay=1" width="560" height="315" frameborder="0" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>'
+        );
+      }
+      /*]]>*/
+    </script>
+    <div class="sideBox" id="introAd">
+      <div class="head">
+        <h2>What is Openwhyd?</h2>
+      </div>
+      <div class="body">
+        <div class="video">
+          <a
+            href="javascript:openVideo()"
+            alt="Watch the video tutorial"
+            title="Watch the video tutorial"
+          ></a>
+        </div>
+      </div>
+    </div>
+
+    {{/isUserLogged}} {{{ sideBox }}} {{#isUserLogged}}
+    {{#userPrefs}}{{^hideBkAd}}
+    <div class="sideBox" id="bookmarkletAd">
+      <div class="head">
+        <h2>Add a track from anywhere</h2>
+        <div class="postRemove" title="Remove this box"></div>
+      </div>
+      <div class="body">
+        Install the "Openwhyd ✚ Track" button into your web browser to add a
+        track directly from other websites.
+        <a href="/button">Use it now!</a>
+      </div>
+    </div>
+    {{/hideBkAd}}{{/userPrefs}} {{/isUserLogged}} {{#recentActivity}}
+    <div class="sideBox recentActivity">
+      <div class="head">
+        <h2>Recent activity</h2>
+        <a href="/recent">See more</a>
+      </div>
+      <div class="body">
+        <ul>
+          {{#items}}
+          <li data-uid="{{id}}">
+            <div
+              style="background-image:url('/img/u/{{id}}');"
+              onclick="$(this).parent().find('a.userName').click();"
+            ></div>
+            <a class="userName" href="/u/{{id}}">{{name}}</a>
+            {{#subscription}} &nbsp;subscribed to
+            <a class="subscribedUser" href="/u/{{id}}">{{name}}</a>
+            {{/subscription}} {{#like}} &nbsp;liked
+            <a href="/c/{{pId}}">a track</a> from
+            <a class="subscribedUser" href="/u/{{id}}">{{name}}</a>
+            {{/like}}
+          </li>
+          {{/items}}
+        </ul>
+        <!--<a href="/recent">See more</a>-->
+      </div>
+    </div>
+    {{/recentActivity}}
+
+    <div id="sideFooter">
+      <ul>
+        <li>
+          <a target="_blank" href="https://github.com/openwhyd">GitHub</a>
+        </li>
+        <li>
+          <a target="_blank" href="http://www.facebook.com/openwhyd"
+            >Facebook</a
+          >
+        </li>
+        <li>
+          <a target="_blank" href="http://twitter.com/open_whyd">Twitter</a>
+        </li>
+        <li>
+          <a
+            target="_blank"
+            href="https://github.com/openwhyd/openwhyd/blob/master/docs/FAQ.md"
+            >FAQ</a
+          >
+        </li>
+      </ul>
+      <p>Openwhyd is maintained collaboratively,<br />under the MIT License.</p>
+    </div>
+  </div>
+  <!-- END RIGHT BAR-->
+  {{/user}}
+  <section class="sub-container">
+    <div>
+      {{#playlist}}
+      <div class="sharing">
+        <!--
+					<a name="fb_share" type="button"></a>
+					<script src="//static.ak.fbcdn.net/connect.php/js/FB.Share" type="text/javascript"></script>
+					<a href="//twitter.com/share" class="twitter-share-button" data-count="none" data-via="open_whyd" >Tweet</a>
+					<script src="//platform.twitter.com/widgets.js" type="text/javascript"></script>
+				-->
+        <iframe
+          class="twitter-share-button twitter-count-horizontal"
+          src="//platform.twitter.com/widgets/tweet_button.1347008535.html#_=1347354227175&amp;count=horizontal&amp;id=twitter-widget-0&amp;lang=en&amp;size=m&amp;via=open_whyd&amp;text={{{urlEncodedTweet}}}"
+          title="Twitter Tweet Button"
+          data-twttr-rendered="true"
+          allowtransparency="true"
+          frameborder="0"
+          scrolling="no"
+        ></iframe>
+        <iframe
+          class="fblikeBtn"
+          src="//www.facebook.com/plugins/like.php?href={{urlEncoded}}&amp;send=false&amp;layout=button_count&amp;width=100&amp;show_faces=false&amp;font&amp;colorscheme=light&amp;action=like&amp;height=21&amp;appId=169250156435902"
+          scrolling="no"
+          frameborder="0"
+          allowTransparency="true"
+        ></iframe>
+        <!--<fb:like id="fblike" href="{{url}}" send="false" layout="button_count" width="450" show_faces="false"></fb:like>
+				<script>
+				/*$("#fblike").attr("href", window.location.href);*/
+				FB.XFBML.parse(document.getElementById('fblike'));
+			</script>
+		-->
+      </div>
+      {{^ownProfile}}
+      <h1>{{name}}</h1>
+      {{/ownProfile}} {{#ownProfile}}
+      <form action="javascript:;">
+        <input
+          type="text"
+          id="playlistNameField"
+          class="bio"
+          value="{{name}}"
+          placeholder="give a name to your playlist"
+          maxlength="42"
+        />
+        <input
+          type="submit"
+          id="playlistNameSubmit"
+          class="greenButton"
+          value="Save"
+        />
+      </form>
+      <div id="playlistActions">
+        <a class="orderPlaylist button" href="{{trackOrderUrl}}"
+          >Change order</a
+        >
+        <a class="deletePlaylist" href="javascript:deletePlaylist();">Delete</a>
+      </div>
+      {{/ownProfile}} {{#user}}
+      <div class="playlistOwner">
+        <div
+          style="background-image:url('/img/u/{{id}}?width=100&amp;height=100')"
+        ></div>
+        <p>by <a href="/u/{{id}}">{{name}}</a></p>
+      </div>
+      {{/user}} {{/playlist}} {{^playlist}} {{#user}}
+      <div
+        class="avatar"
+        style="background-image:url('/img/u/{{id}}?width=100&amp;height=100')"
+      ></div>
+      <h2>{{name}}</h2>
+
+      {{#subscriptions}}
+      <div id="userStats">
+        <a id="userSubscriptions" href="javascript:showSubscriptions()">
+          <span>{{nbSubscriptions}}</span> following</a
+        >
+        <a id="userSubscribers" href="javascript:showSubscribers()">
+          <span>{{nbSubscribers}}</span> followers</a
+        >
+      </div>
+      {{/subscriptions}}
+
+      <div class="bio">{{{renderedBio}}}</div>
+
+      {{#isUserLogged}} {{#ownProfile}}
+      <div class="userSubscribe" onclick="showEditProfileDlg()">
+        Edit profile
+      </div>
+      {{/ownProfile}} {{^ownProfile}}
+      <div
+        class="userSubscribe {{#isSubscribed}}subscribed{{/isSubscribed}}"
+        onclick="switchSubscription()"
+        onmouseover="if ($(this).hasClass('subscribed')) this.innerHTML = 'Unfollow';"
+        onmouseout="if ($(this).hasClass('subscribed')) this.innerHTML = 'Following';"
+      >
+        {{#isSubscribed}}Following{{/isSubscribed}}
+        {{^isSubscribed}}Follow{{/isSubscribed}}
+      </div>
+      {{/ownProfile}} {{/isUserLogged}} {{/user}} {{^user}} {{#globalFeed}}
+      {{#isUserLogged}}
+      <a
+        href="/stream"
+        style="float: right; margin-top: 20px; margin-right: 20px"
+        >Back to Stream</a
+      >
+      {{/isUserLogged}}
+      <h2 class="head-name-tab">Recent tracks from all users</h2>
+      {{/globalFeed}} {{#homeFeed}}
+      <a href="/all" style="float: right; margin-top: 20px; margin-right: 20px"
+        >Other recent tracks</a
+      >
+      <h2 class="head-name-tab">Stream</h2>
+      {{/homeFeed}}
+      <!--	<h2>{{streamTitle}}</h2> -->
+      {{/user}} {{/playlist}}
+    </div>
+
+    <div class="posts {{^user}}fullStream{{/user}}">
+      {{^playlist}} {{#user}}
+
+      <div id="tabSelector">
+        <a
+          href="/u/{{id}}"
+          class="{{^showPlaylists}}{{^showLikes}}selected{{/showLikes}}{{/showPlaylists}}"
+        >
+          {{#ownProfile}}All tracks{{/ownProfile}}
+          {{^ownProfile}}Stream{{/ownProfile}}
+        </a>
+        <a
+          href="/u/{{id}}/playlists"
+          class="{{#showPlaylists}}selected{{/showPlaylists}}"
+        >
+          {{nbPlaylists}} Playlists
+        </a>
+        <a href="/u/{{id}}/likes" class="{{#showLikes}}selected{{/showLikes}}">
+          {{nbLikes}} Likes
+        </a>
+        <a href="javascript:return false;" class="right filter">
+          <div></div>
+          Filter
+        </a>
+      </div>
+      <div id="filterBox">
+        <input type="text" class="q" placeholder="filter" />
+        <div class="clear"></div>
+      </div>
+      {{/user}} {{/playlist}} {{/header}} {{#showPlaylists}} {{#ownProfile}}
+      <a href="/u/{{#user}}{{id}}{{/user}}/playlist/create" id="btnNewPlaylist">
+        + new playlist
+      </a>
+      {{/ownProfile}} {{#items}}
+      <div class="playlist" onclick="goToPage('{{url}}');">
+        <div class="thumbs">
+          {{#lastPosts}}
+          <img src="{{img}}" />
+          {{/lastPosts}}
+        </div>
+        <h2><a href="{{url}}">{{name}}</a></h2>
+        <span>{{nbTracks}} tracks</span>
+      </div>
+      {{/items}} {{/showPlaylists}} {{^showPlaylists}}
+
+      <div class="addPost">
+        <a href="javascript:modalPostBox(onNewPost)"> Add a track </a>
+      </div>
+      <!--<div class="post"></div>-->
+      {{{posts}}} {{#hasMore}}
+      <div class="btnLoadMore" onclick="loadMore()">
+        <div>&nbsp;</div>
+        <span>Load more</span>
+      </div>
+      {{/hasMore}}
+
+      <script>
+        $(function () {
+          /*{{#hasMore}}*/
+          window.nextPageUrl = makeUrl({
+            after: '{{lastPid}}',
+          }); /*window.location.href + "?after=" + "{{lastPid}}";*/
+          /*{{/hasMore}}*/
+
+          /*{{#hasLess}}*/
+          window.prevPageUrl = makeUrl({ before: '{{firstPid}}' }); //window.location.href + "?before=" + "{{firstPid}}";
+          /*{{/hasLess}}*/
+
+          /*{{#playlist}}*/
+          window.pagePlaylist = { id: '{{id}}', name: '{{{_js_name}}}' };
+          /*{{/playlist}}*/
+        });
+      </script>
+
+      {{/showPlaylists}} {{#user}}
+      <script>
+        window.pageUser = { id: '{{id}}', name: '{{{_js_name}}}' };
+      </script>
+      {{/user}} {{#header}}
+    </div>
+  </section>
+  <!-- END SUB CONTAINER-->
+
+  {{/header}}
+</div>
+<!-- END CONTAINER-->
+
+{{#header}} {{#user}}
+<script
+  src="/js/feed-filter.js"
+  type="text/javascript"
+  charset="utf-8"
+></script>
+{{/user}} {{/header}} {{#ownProfile}}
+<script src="/js/feed-edit.js" type="text/javascript" charset="utf-8"></script>
+{{/ownProfile}}

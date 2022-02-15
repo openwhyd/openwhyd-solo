@@ -1,0 +1,24 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:3.4
+    command: mongod --port 27117
+    volumes:
+      - /data # Data Persistance
+    ports:
+      - '27117:27117'
+    logging:
+      driver: none
+
+  web:
+    restart: 'always'
+    build: .
+    ports:
+      - '8080:8080'
+    depends_on:
+      - mongo
+    env_file:
+      - 'env-vars-testing.conf'
+    environment:
+      - MONGODB_HOST=mongo
+      - MONGODB_PORT=27117

@@ -1,0 +1,52 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "eslint:recommended",
+    "prettier",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended" // Uses the recommended rules from the @typescript-eslint/eslint-plugin
+  ],
+  "plugins": ["prettier", "@typescript-eslint"],
+  "parserOptions": {
+    "project": "tsconfig.json",
+    "ecmaVersion": 2019
+  },
+  "ignorePatterns": [
+    "public/press/js/jquery-1.10.2.min.js",
+    "public/press/js/sliderz.v1.js"
+  ],
+  "rules": {
+    "prettier/prettier": "error",
+    "no-inner-declarations": ["warn", "functions"]
+  },
+  "overrides": [
+    {
+      "files": [
+        "config/**/*.js",
+        "misc/**/*.js",
+        "public/**/*.js",
+        "scripts/**/*.js",
+        "test/**/*.js"
+      ],
+      "rules": {
+        "no-undef": "warn",
+        "no-redeclare": "warn",
+        "@typescript-eslint/no-empty-function": "warn",
+        "@typescript-eslint/no-unused-vars": "warn",
+        "@typescript-eslint/no-this-alias": "warn"
+      }
+    },
+    {
+      "files": ["*.js"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    }
+  ],
+  "env": {
+    "browser": true,
+    "jest": true,
+    "node": true,
+    "es6": true
+  }
+}

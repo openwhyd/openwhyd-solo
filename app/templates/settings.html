@@ -1,0 +1,222 @@
+{{#user}}
+<div id="settingsPanel" class="container">
+  <ul id="tabSelector">
+    <li>
+      <a href="javascript:{};//#tabAccount" class="selected"
+        >Account
+        <div></div
+      ></a>
+    </li>
+    <li>
+      <a href="javascript:{};//#tabPassword"
+        >Password
+        <div></div
+      ></a>
+    </li>
+    <li>
+      <a href="javascript:{};//#tabNotif"
+        >Notifications
+        <div></div
+      ></a>
+    </li>
+  </ul>
+
+  <div class="sub-container">
+    <h2 class="head-name-tab">Settings</h2>
+
+    <div id="tabAccount" class="tabContent">
+      <form method="POST" action="/api/user">
+        <fieldset class="fld">
+          <legend>Custom URL</legend>
+          <input
+            type="text"
+            name="handle"
+            placeholder="e.g. john_smith_83"
+            maxlength="18"
+            value="{{handle}}"
+          />
+          <span class="msg"><!--Special characters are not allowed--></span>
+          <p id="url">http://openwhyd.org/<span>john_smith_83</span></p>
+        </fieldset>
+        <fieldset class="fld">
+          <legend>Email</legend>
+          <input
+            type="text"
+            name="email"
+            placeholder="e.g. john.smith@provider.com"
+            value="{{email}}"
+          />
+          <span class="msg"></span>
+        </fieldset>
+        <fieldset class="fld">
+          <legend>Last.fm</legend>
+          <a
+            id="lastFmConn"
+            href="https://www.last.fm/api/auth/?api_key=f623354f2157a4640e63eec23f8d91e5"
+            target="_blank"
+          ></a>
+          <div id="lastFmPref">
+            <label>
+              Scrobbling played tracks to your account:
+              <a id="lastFmProfile" href="#" target="_blank">username</a>
+            </label>
+            <label>
+              <a id="lastFmDcon" href="#" target="_blank"
+                >Disconnect your last.fm account</a
+              >
+            </label>
+            <p class="msg"></p>
+          </div>
+        </fieldset>
+        <fieldset class="fld">
+          <legend>Deezer</legend>
+          <a
+            id="deezerConn"
+            href="https://www.last.fm/api/auth/?api_key=f623354f2157a4640e63eec23f8d91e5"
+            target="_blank"
+          ></a>
+          <div id="deezerProfile">
+            <a href="#" target="_blank">Connect your Deezer</a>
+          </div>
+          <p class="msg"></p>
+        </fieldset>
+        <br />
+        <input type="submit" class="greenButton" value="Save changes" />
+      </form>
+      <a id="deleteAccount" href="javascript:deleteAccount();"
+        >Delete your account</a
+      >
+    </div>
+
+    <div id="tabPassword" class="tabContent">
+      <form method="POST" action="/api/user">
+        <fieldset class="fld">
+          <legend>Current password:</legend>
+          <input type="password" name="old" />
+          <span class="msg"></span>
+        </fieldset>
+        <fieldset class="fld pwdRepeat nomargin">
+          <legend>New password:</legend>
+          <input type="password" name="new1" />
+          <span class="msg"></span>
+        </fieldset>
+        <fieldset class="fld pwdRepeat">
+          <legend>Confirm new password:</legend>
+          <input type="password" name="new2" />
+          <span class="msg"></span>
+        </fieldset>
+        <p style="display: none">error</p>
+        <input type="submit" class="greenButton" value="Save changes" />
+      </form>
+    </div>
+
+    <div id="tabNotif" class="tabContent">
+      <form method="POST" action="/api/user">
+        <fieldset class="fld">
+          <legend>Send me an email when:</legend>
+          {{#pref}}
+          <!--
+					<div data-value="{{emLik}}">
+						<p>Someone likes one of my tracks</p>
+						<label><input type="radio" name="emLik" value="7">Weekly</label>
+						<label><input type="radio" name="emLik" value="1">Daily</label>
+						<label><input type="radio" name="emLik" value="0">Instantly</label>
+						<label><input type="radio" name="emLik" value="-1">Never</label>
+					</div>
+					<div data-value="{{emAdd}}">
+						<p>Someone adds one of my tracks</p>
+						<label><input type="radio" name="emAdd" value="7">Weekly</label>
+						<label><input type="radio" name="emAdd" value="1">Daily</label>
+						<label><input type="radio" name="emAdd" value="0">Instantly</label>
+						<label><input type="radio" name="emAdd" value="-1">Never</label>
+					</div>
+					<div data-value="{{emSub}}">
+						<p>Someone subscribes to me</p>
+						<label><input type="radio" name="emSub" value="7">Weekly</label>
+						<label><input type="radio" name="emSub" value="1">Daily</label>
+						<label><input type="radio" name="emSub" value="0">Instantly</label>
+						<label><input type="radio" name="emSub" value="-1">Never</label>
+					</div>
+					-->
+          <label>
+            <input
+              type="checkbox"
+              name="emLik"
+              value="1"
+              data-checked="{{emLik}}"
+            />
+            Someone likes one of my tracks
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="emAdd"
+              value="1"
+              data-checked="{{emAdd}}"
+            />
+            Someone adds one of my tracks
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="emSub"
+              value="1"
+              data-checked="{{emSub}}"
+            />
+            Someone subscribes to me
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="emCom"
+              value="1"
+              data-checked="{{emCom}}"
+            />
+            Someone comments my tracks
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="emMen"
+              value="1"
+              data-checked="{{emMen}}"
+            />
+            Someone mentions me in a comment
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="emRep"
+              value="1"
+              data-checked="{{emRep}}"
+            />
+            Someone replies to one of your comments
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              name="emFrd"
+              value="1"
+              data-checked="{{emFrd}}"
+            />
+            One of your Facebook friends joined Openwhyd
+          </label>
+          <div>
+            <p>How often?</p>
+            <label><input type="radio" name="emFreq" value="7" />Weekly</label>
+            <label><input type="radio" name="emFreq" value="1" />Daily</label>
+            <label
+              ><input type="radio" name="emFreq" value="0" />Instantly</label
+            >
+            <!--<label><input type="radio" value="-1">Never</label>-->
+          </div>
+          {{/pref}}
+        </fieldset>
+        <input type="submit" class="greenButton" value="Save changes" />
+      </form>
+    </div>
+  </div>
+</div>
+{{/user}}
+
+<script src="/js/settings.js" type="text/javascript"></script>

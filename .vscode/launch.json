@@ -1,0 +1,65 @@
+{
+  // Use IntelliSense to learn about possible Node.js debug attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Openwhyd server with mongo:27117",
+      "console": "internalConsole",
+      "restart": true,
+      "cwd": "${workspaceRoot}",
+      "envFile": "${workspaceRoot}/env-vars-testing.conf",
+      "program": "${workspaceRoot}/app.js",
+      "runtimeVersion": "16.13.1", // to keep in sync with .nvmrc
+      "args": ["--mongoDbDatabase", "openwhyd_test", "--mongoDbPort", "27117"]
+      // Notice: make sure that the mongodb server is listening on port 27117
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Openwhyd server",
+      "console": "internalConsole",
+      "restart": true,
+      "cwd": "${workspaceRoot}",
+      "envFile": "${workspaceRoot}/env-vars-testing.conf",
+      "program": "${workspaceRoot}/app.js",
+      "args": ["--mongoDbDatabase", "openwhyd_test"]
+      // Notice: make sure that the mongodb server is listening on port 27017
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run all tests",
+      "console": "internalConsole",
+      "restart": true,
+      "preLaunchTask": "run-all-tests",
+      "cwd": "${workspaceRoot}",
+      "envFile": "${workspaceRoot}/env-vars-testing.conf",
+      "program": "${workspaceRoot}/app.js",
+      "args": ["--mongoDbDatabase", "openwhyd_test"]
+      // Notice: make sure that the mongodb server is listening on port 27017
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run API tests",
+      "console": "internalConsole",
+      "restart": true,
+      "preLaunchTask": "run-api-tests",
+      "cwd": "${workspaceRoot}",
+      "envFile": "${workspaceRoot}/env-vars-testing.conf",
+      "program": "${workspaceRoot}/app.js",
+      "args": ["--mongoDbDatabase", "openwhyd_test"]
+      // Notice: make sure that the mongodb server is listening on port 27017
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "program": "${file}"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+ALL    /                               -> controllers.userLibrary
+GET    /home                           -> controllers.userLibrary
+POST   /home                           -> controllers.userLibrary
+
+GET    /favicon.ico                    -> controllers.static
+GET    /favicon.png                    -> controllers.static
+GET    /privacy                        -> controllers.static
+
+GET    /about                          -> controllers.redir
+GET    /api                            -> controllers.redir
+GET    /community                      -> controllers.redir
+GET    /contact                        -> controllers.redir
+GET    /contribute                     -> controllers.redir
+GET    /donate                         -> controllers.redir
+GET    /faq                            -> controllers.redir
+GET    /help                           -> controllers.redir
+GET    /sponsor                        -> controllers.redir
+GET    /support                        -> controllers.redir
+GET    /team                           -> controllers.redir
+GET    /tos                            -> controllers.redir
+
+GET    /register                       -> controllers.private.register
+POST   /register                       -> controllers.private.register
+
+GET    /upload_data/{id}               -> controllers.uploadedFile
+GET    /uAvatarImg/{uAvatarImg}        -> controllers.uploadedFile
+GET    /uCoverImg/{uCoverImg}          -> controllers.uploadedFile
+GET    /uPlaylistImg/{uPlaylistImg}    -> controllers.uploadedFile
+GET    /img/{type}/{id}                -> controllers.uploadedFile
+
+GET    /stream                         -> controllers.userLibrary
+
+GET    /settings                       -> controllers.settings
+POST   /settings                       -> controllers.settings
+
+GET    /signup                         -> controllers.invite
+
+GET    /consent                        -> controllers.consent
+POST   /consent                        -> controllers.consent
+
+GET    /login                          -> controllers.api.login
+POST   /login                          -> controllers.api.login
+
+GET    /password                       -> controllers.private.password
+POST   /password                       -> controllers.private.password
+GET    /upload                         -> controllers.private.upload
+POST   /upload                         -> controllers.private.upload
+
+GET    /post                           -> controllers.api.postEdit
+GET    /post/add                       -> controllers.api.postEdit
+GET    /post/{pId}                     -> controllers.api.postEdit
+GET    /post/{pId}/add                 -> controllers.api.postEdit
+GET    /post/{pId}/edit                -> controllers.api.postEdit
+GET    /post/{id}                      -> controllers.postViewer
+GET    /post/{id}/{orig}               -> controllers.postViewer
+GET    /c/{id}                         -> controllers.postViewer
+GET    /c/{id}/{orig}                  -> controllers.postViewer
+GET    /yt/{eId}                       -> controllers.postViewer
+GET    /sc/{eId}/{_1}                  -> controllers.postViewer
+GET    /dm/{eId}                       -> controllers.postViewer
+GET    /vi/{eId}                       -> controllers.postViewer
+GET    /ja/{eId}                       -> controllers.postViewer
+GET    /dz/{eId}                       -> controllers.postViewer
+GET    /fi/{eId}                       -> controllers.postViewer
+GET    /bc/{eId}                       -> controllers.postViewer
+GET    /bc/{eId}/{_1}                  -> controllers.postViewer
+GET    /bc/{eId}/{_1}/{_2}             -> controllers.postViewer
+
+GET    /api/{_subCtr}                  -> controllers.subdir
+POST   /api/{_subCtr}                  -> controllers.subdir
+GET    /api/{_subCtr}/{_1}             -> controllers.subdir
+POST   /api/{_subCtr}/{_1}             -> controllers.subdir
+GET    /api/{_subCtr}/{_1}/{_2}        -> controllers.subdir
+POST   /api/{_subCtr}/{_1}/{_2}        -> controllers.subdir
+GET    /api/{_subCtr}/{_1}/{_2}/{_3}   -> controllers.subdir
+POST   /api/{_subCtr}/{_1}/{_2}/{_3}   -> controllers.subdir
+
+GET    /admin/{_subCtr}                -> controllers.subdir
+POST   /admin/{_subCtr}                -> controllers.subdir
+GET    /admin/{_subCtr}/{action}       -> controllers.subdir
+
+POST   /testing/{_subCtr}              -> controllers.subdir
+
+GET    /me                             -> controllers.userLibrary
+GET    /u/{id}                         -> controllers.userLibrary
+GET    /u/{id}/likes                   -> controllers.userLibrary
+GET    /u/{id}/playlists               -> controllers.userLibrary
+GET    /u/{id}/playlist/{playlistId}   -> controllers.userLibrary
+GET    /u/{id}/activity                -> controllers.userLibrary
+GET    /u/{id}/subscribers             -> controllers.userLibrary
+GET    /u/{id}/subscriptions           -> controllers.userLibrary
+GET    /{handle}                       -> controllers.userLibrary
+GET    /{handle}/likes                 -> controllers.userLibrary
+GET    /{handle}/playlists             -> controllers.userLibrary
+GET    /{handle}/playlist/{playlistId} -> controllers.userLibrary
+GET    /{handle}/activity              -> controllers.userLibrary
+GET    /{handle}/subscribers           -> controllers.userLibrary
+GET    /{handle}/subscriptions         -> controllers.userLibrary
+
+GET    /u/{uId}/playlist/{plId}/edit   -> controllers.private.playlistOrder

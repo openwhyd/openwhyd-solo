@@ -54,6 +54,22 @@ describe(`post api`, function () {
     });
   });
 
+  // TODO: "should add a track from a blog"
+
+  // TODO: "should add a track from bookmarklet"
+
+  // TODO: "should add a track from hot tracks"
+
+  // TODO: "should add a track to an existing playlist"
+
+  // TODO: "should add a track to a new playlist"
+
+  // TODO: "should warn if about to add a track that I already posted in the past"
+
+  // TODO: fix consistency in naming of tests
+
+  // TODO: "should ask to login if trying to add track without session"
+
   it(`should allow re-adding a track (aka "repost")`, function (done) {
     api.loginAs(DUMMY_USER, function (error, { jar }) {
       api.addPost(jar, { pId }, function (error, { body }) {
@@ -67,6 +83,12 @@ describe(`post api`, function () {
       });
     });
   });
+
+  // TODO: "should re-add a track into a new playlist"
+
+  // TODO: "should re-add a track into an existing playlist"
+
+  // TODO: "should allow re-adding a track into another playlist"
 
   var playlistFullId;
   const firstPlaylistIndex = 0;

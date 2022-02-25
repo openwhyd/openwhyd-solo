@@ -1,6 +1,6 @@
 // Run with: $ npm run test:approval
 
-require('approvals').mocha();
+const approvals = require('approvals').mocha();
 const util = require('util');
 
 const {
@@ -13,6 +13,10 @@ const URL_PREFIX = process.env.URL_PREFIX || 'http://localhost:8080';
 
 const MONGODB_URL =
   process.env.MONGODB_URL || 'mongodb://localhost:27117/openwhyd_test';
+
+approvals.configure({
+  reporters: ['nodediff'], // displays colors in diff
+});
 
 async function setupTestEnv() {
   const {

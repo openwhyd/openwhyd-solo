@@ -2,14 +2,6 @@
 
 require('approvals').mocha();
 const util = require('util');
-const api = require('../api-client');
-const {
-  makeJSONScrubber,
-  dumpMongoCollection,
-  readMongoDocuments,
-  insertTestData,
-  startOpenwhydServer,
-} = require('../approval-tests-helpers');
 
 const {
   START_WITH_ENV_FILE,
@@ -22,9 +14,16 @@ const URL_PREFIX = process.env.URL_PREFIX || 'http://localhost:8080';
 const MONGODB_URL =
   process.env.MONGODB_URL || 'mongodb://localhost:27117/openwhyd_test';
 
-const context = {};
-
-before(async () => {
+async function setupTestEnv() {
+  const {
+    makeJSONScrubber,
+    dumpMongoCollection,
+    readMongoDocuments,
+    insertTestData,
+    startOpenwhydServer,
+  } = require('../approval-tests-helpers');
+  const api = require('../api-client');
+  const context = { api, makeJSONScrubber, dumpMongoCollection };
   context.testDataCollections = {
     user: await readMongoDocuments(__dirname + '/../approval.users.json.js'),
     post: [], // await readMongoDocuments(__dirname + '/../approval.posts.json.js'),
@@ -37,18 +36,21 @@ before(async () => {
   });
   context.getUser = (id) =>
     context.testDataCollections.user.find(({ _id }) => id === _id.toString());
-});
+  return context;
+}
 
-after(() => {
+function teardownTestEnv(context) {
   if (context.serverProcess?.kill && !DONT_KILL) {
     context.serverProcess.kill('SIGINT');
   }
-});
+}
 
 describe('When posting a track', function () {
+  let context;
   let postedTrack;
 
   before(async () => {
+    context = await setupTestEnv();
     const user = context.testDataCollections.user[0];
     const post = {
       uId: user._id,
@@ -63,9 +65,11 @@ describe('When posting a track', function () {
         name: 'BOYLE - Roppongi Hills (Music Video) - YouTube',
       },
     };
-    const { jar } = await util.promisify(api.loginAs)(user);
-    postedTrack = (await util.promisify(api.addPost)(jar, post)).body;
+    const { jar } = await util.promisify(context.api.loginAs)(user);
+    postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
   });
+
+  after(() => teardownTestEnv(context));
 
   const scrubObjectId =
     (objectId) =>
@@ -73,13 +77,29 @@ describe('When posting a track', function () {
       data.replace(objectId, '__OBJECT_ID__');
 
   it('should respond with the track data', function () {
-    const scrub = makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     this.verifyAsJSON(scrub(postedTrack)); // or this.verify(data)
   });
 
   it('should be listed in the "post" db collection', async function () {
-    const scrub = makeJSONScrubber([scrubObjectId(postedTrack._id)]);
-    const dbPosts = await dumpMongoCollection(MONGODB_URL, 'post');
+    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
+  });
+});
+
+// basic example / template for next tests
+describe('When setting up a new test environment', function () {
+  let context;
+
+  before(async () => {
+    context = await setupTestEnv();
+  });
+
+  after(() => teardownTestEnv(context));
+
+  it('should have an empty "post" db collection', async function () {
+    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
+    this.verifyAsJSON(dbPosts);
   });
 });

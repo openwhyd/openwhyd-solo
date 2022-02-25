@@ -1,3 +1,5 @@
+// Run with: $ npm run test:approval
+
 require('approvals').mocha();
 
 describe('When running some tests', function () {

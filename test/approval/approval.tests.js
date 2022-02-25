@@ -9,8 +9,6 @@ const {
   DONT_KILL,
 } = process.env;
 
-const URL_PREFIX = process.env.URL_PREFIX || 'http://localhost:8080';
-
 const MONGODB_URL =
   process.env.MONGODB_URL || 'mongodb://localhost:27117/openwhyd_test';
 
@@ -28,18 +26,17 @@ async function setupTestEnv() {
   } = require('../approval-tests-helpers');
   const api = require('../api-client');
   const context = { api, makeJSONScrubber, dumpMongoCollection };
+  // insert fixtures / test data
   context.testDataCollections = {
     user: await readMongoDocuments(__dirname + '/../approval.users.json.js'),
     post: [], // await readMongoDocuments(__dirname + '/../approval.posts.json.js'),
   };
   await insertTestData(MONGODB_URL, context.testDataCollections);
-
+  // start openwhyd server
   context.serverProcess = await startOpenwhydServer({
     startWithEnv: START_WITH_ENV_FILE,
     port: PORT,
   });
-  context.getUser = (id) =>
-    context.testDataCollections.user.find(({ _id }) => id === _id.toString());
   return context;
 }
 

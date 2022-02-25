@@ -1,6 +1,8 @@
 var assert = require('assert');
+const util = require('util');
+const request = require('request');
 
-var { DUMMY_USER, cleanup } = require('../fixtures.js');
+var { DUMMY_USER, cleanup, URL_PREFIX } = require('../fixtures.js');
 var api = require('../api-client.js');
 
 describe(`post api`, function () {
@@ -11,6 +13,32 @@ describe(`post api`, function () {
     eId: '/yt/XdJVWSqb4Ck',
     name: 'Lullaby - Jack Johnson and Matt Costa',
   };
+
+  it("should edit a track's name", async function () {
+    const { jar } = await util.promisify(api.loginAs)(DUMMY_USER);
+    const { body } = await util.promisify(api.addPost)(jar, post);
+    const pId = body._id;
+    const newName = 'coucou';
+    await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          url: `${URL_PREFIX}/api/post?action=insert&eId=%2Ffi%2Fhttps%3A%2F%2Ffile-examples-com.github.io%2Fuploads%2F2017%2F11%2Ffile_example_MP3_700KB.mp3%3F_%3D1645782509315&name=${newName}&src%5Bid%5D=&src%5Bname%5D=&_id=${pId}&pl%5Bname%5D=full+stream&pl%5Bid%5D=null&text=`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const res = await new Promise((resolve, reject) =>
+      request.get(
+        `${URL_PREFIX}/c/${pId}?format=json`,
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const postedTrack = JSON.parse(res.body).data;
+    assert.equal(postedTrack.name, newName);
+  });
 
   it(`should allow adding a track`, function (done) {
     api.loginAs(DUMMY_USER, function (error, { jar }) {

@@ -5,6 +5,11 @@ const request = require('request');
 const childProcess = require('child_process');
 const waitOn = require('wait-on');
 
+const makeJSONScrubber = (scrubbers) => (obj) =>
+  JSON.parse(
+    scrubbers.reduce((data, scrub) => scrub(data), JSON.stringify(obj))
+  );
+
 const readFile = (file) => fs.promises.readFile(file, 'utf-8');
 
 const loadEnvVars = async (file) => {
@@ -148,6 +153,7 @@ async function startOpenwhydServer({ startWithEnv, port }) {
 }
 
 module.exports = {
+  makeJSONScrubber,
   loadEnvVars,
   httpClient,
   ObjectId,

@@ -4,6 +4,7 @@ require('approvals').mocha();
 const util = require('util');
 const api = require('../api-client');
 const {
+  makeJSONScrubber,
   readMongoDocuments,
   insertTestData,
   startOpenwhydServer,
@@ -66,7 +67,10 @@ describe('When posting a track', function () {
   });
 
   it('should respond with the track data', function () {
-    this.verifyAsJSON(postedTrack); // or this.verify(data)
+    const scrub = makeJSONScrubber([
+      (data = '') => data.replace(postedTrack._id, '__OBJECT_ID__'),
+    ]);
+    this.verifyAsJSON(scrub(postedTrack)); // or this.verify(data)
   });
 
   // TODO: it('should be listed in the "post" db collection', function () {

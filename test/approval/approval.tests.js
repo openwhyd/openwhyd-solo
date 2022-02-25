@@ -5,6 +5,7 @@ const util = require('util');
 const api = require('../api-client');
 const {
   makeJSONScrubber,
+  dumpMongoCollection,
   readMongoDocuments,
   insertTestData,
   startOpenwhydServer,
@@ -26,7 +27,7 @@ const context = {};
 before(async () => {
   context.testDataCollections = {
     user: await readMongoDocuments(__dirname + '/../approval.users.json.js'),
-    post: await readMongoDocuments(__dirname + '/../approval.posts.json.js'),
+    post: [], // await readMongoDocuments(__dirname + '/../approval.posts.json.js'),
   };
   await insertTestData(MONGODB_URL, context.testDataCollections);
 
@@ -66,12 +67,19 @@ describe('When posting a track', function () {
     postedTrack = (await util.promisify(api.addPost)(jar, post)).body;
   });
 
+  const scrubObjectId =
+    (objectId) =>
+    (data = '') =>
+      data.replace(objectId, '__OBJECT_ID__');
+
   it('should respond with the track data', function () {
-    const scrub = makeJSONScrubber([
-      (data = '') => data.replace(postedTrack._id, '__OBJECT_ID__'),
-    ]);
+    const scrub = makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     this.verifyAsJSON(scrub(postedTrack)); // or this.verify(data)
   });
 
-  // TODO: it('should be listed in the "post" db collection', function () {
+  it('should be listed in the "post" db collection', async function () {
+    const scrub = makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+    const dbPosts = await dumpMongoCollection(MONGODB_URL, 'post');
+    this.verifyAsJSON(scrub(dbPosts));
+  });
 });

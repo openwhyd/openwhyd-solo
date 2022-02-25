@@ -79,10 +79,19 @@ async function insertTestData(url, docsPerCollection) {
   await Promise.all(
     Object.keys(docsPerCollection).map(async (collection) => {
       await db.collection(collection).deleteMany({});
-      await db.collection(collection).insertMany(docsPerCollection[collection]);
+      const docs = docsPerCollection[collection];
+      if (docs.length > 0) await db.collection(collection).insertMany(docs);
     })
   );
   await mongoClient.close();
+}
+
+async function dumpMongoCollection(url, collection) {
+  const mongoClient = await connectToMongoDB(url);
+  const db = mongoClient.db();
+  const documents = await db.collection(collection).find({}).toArray();
+  await mongoClient.close();
+  return documents;
 }
 
 function indentJSON(json) {
@@ -159,6 +168,7 @@ module.exports = {
   ObjectId,
   connectToMongoDB,
   readMongoDocuments,
+  dumpMongoCollection,
   insertTestData,
   indentJSON,
   getCleanedPageBody,

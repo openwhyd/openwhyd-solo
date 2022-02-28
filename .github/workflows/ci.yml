@@ -200,7 +200,6 @@ jobs:
           wait-on: 'http://localhost:8080'
           config-file: cypress.json
           browser: 'chromium' # to include browser console in cypress logs
-          record: true
           parallel: true
         env:
           CI: true

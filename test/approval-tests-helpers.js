@@ -131,11 +131,17 @@ const errPrinter = ((blocklist) => {
 ]);
 
 async function startOpenwhydServerWith(env) {
-  const serverProcess = childProcess.fork('./app.js', [], {
-    env,
-    silent: true,
-  });
+  const serverProcess =
+    process.env.COVERAGE === 'true'
+      ? childProcess.exec('npm run start:coverage', {
+          env: { ...env, PATH: process.env.PATH },
+        })
+      : childProcess.fork('./app.js', [], {
+          env,
+          silent: true,
+        });
   serverProcess.stderr.on('data', errPrinter);
+  // serverProcess.stdout.on('data', errPrinter); // for debugging only
   serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
   await waitOn({ resources: [serverProcess.URL] });
   return serverProcess;

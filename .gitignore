@@ -18,3 +18,5 @@ coverage
 /appd.dmn
 /env-vars-local.sh
 /env-vars-perso.sh
+
+.gitattributes

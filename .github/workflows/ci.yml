@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 env:
   FORCE_COLOR: '3' # asks Chalk to use colors in logs of Yarn, Jest, ESLint and many others
@@ -229,36 +229,6 @@ jobs:
         with:
           name: cypress-videos
           path: cypress/videos
-
-  coverage:
-    name: Send coverage reports to Codacy
-    needs:
-      - cypress-tests
-      - approval-tests
-      # TODO: add coverage for unit and integration tests too
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: cypress-code-coverage-report
-          path: coverage-cypress/
-      - uses: actions/download-artifact@v2
-        with:
-          name: approval-code-coverage-report
-          path: coverage-approval/
-      - name: Merge coverage reports
-        run: |
-          mkdir .nyc_output
-          mkdir coverage-reports
-          cp coverage-cypress/.nyc_output/*.json coverage-reports
-          cp coverage-approval/.nyc_output/*.json coverage-reports
-          npx nyc merge coverage-reports .nyc_output/merged-coverage.json
-          npx nyc report --reporter=lcov --reporter=text  # stores the coverage report in coverage/lcov.info
-      - uses: codacy/codacy-coverage-reporter-action@master
-        with:
-          project-token: ${{ secrets.CODACY_REPOSITORY_TOKEN_FOR_COVERAGE }}
-          coverage-reports: coverage/lcov.info
 
   docker:
     # To publish the Docker image from here, see https://github.com/openwhyd/openwhyd/pull/308/commits/1eacaa98885789642ba0073c9bb4d822021f0d95#diff-12a86cef0c4707531fdbabac3e38cb2aR36

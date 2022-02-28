@@ -40,9 +40,9 @@ async function setupTestEnv() {
   return context;
 }
 
-async function teardownTestEnv(context) {
+function teardownTestEnv(context) {
   if (context.serverProcess?.kill && !DONT_KILL) {
-    await context.serverProcess.kill('SIGINT');
+    context.serverProcess.kill('SIGINT');
   }
 }
 

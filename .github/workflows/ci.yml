@@ -15,6 +15,7 @@ jobs:
   code-checks:
     name: Code checks
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -50,6 +51,7 @@ jobs:
   approval-tests:
     name: Approval tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     services:
       mongodb:
@@ -102,6 +104,7 @@ jobs:
   unit-tests:
     name: Unit tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -123,6 +126,7 @@ jobs:
   integration-tests:
     name: Integration tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     services:
       mongodb:
@@ -160,6 +164,7 @@ jobs:
   cypress-tests:
     name: Cypress E2E tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     services:
       mongodb:
@@ -233,6 +238,7 @@ jobs:
   docker:
     # To publish the Docker image from here, see https://github.com/openwhyd/openwhyd/pull/308/commits/1eacaa98885789642ba0073c9bb4d822021f0d95#diff-12a86cef0c4707531fdbabac3e38cb2aR36
     name: Docker tests
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2

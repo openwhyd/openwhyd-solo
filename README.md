@@ -2,8 +2,6 @@
 
 # Openwhyd
 
-coucou
-
 > 💎 Like Pinterest, for Music. Discover, collect and play music from Youtube, Soundcloud, Bandcamp, Deezer and other streaming platforms.
 
 Openwhyd is a music curation service freely available at [openwhyd.org](https://openwhyd.org). It was designed for music lovers who enjoy taking their time to find the best tracks and videos for their collection, including:

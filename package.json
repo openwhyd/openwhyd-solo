@@ -12,6 +12,7 @@
   "scripts": {
     "postinstall": "cp node_modules/playemjs/dist/playem-*.js public/js/",
     "start": "node app.js $@",
+    "start:localdb": "node app.js $@ --mongoDbDatabase openwhyd_test --mongoDbHost localhost --mongoDbPort 27117",
     "start:coverage": "npx nyc --silent node app.js $@",
     "test-reset": "node test/reset-test-db.js",
     "test:integration": "npx mocha test/integration/*.js --serial --exit",

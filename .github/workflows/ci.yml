@@ -82,9 +82,6 @@ jobs:
       #     npm run start:coverage --mongoDbDatabase openwhyd_test &
       #     ./scripts/wait-for-http-server.sh 8080 # give openwhyd's server some time to start
       - name: Approval tests
-        env:
-          #   PORT: '8080'
-          #   DONT_KILL: '1'
         run: npm run test:approval
       - name: Get coverage data
         run: |

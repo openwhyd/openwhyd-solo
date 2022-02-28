@@ -74,18 +74,18 @@ jobs:
           CI: true
         run: npm install --prefer-offline --no-audit
       - name: Approval tests
-        run: npm run test:approval:coverage
-      - name: Get coverage data
-        run: |
-          sleep 2 # give some time for nyc (npm run start:coverage) to save coverage info
-          npx nyc report --reporter=lcov # stores the coverage report in coverage/lcov.info
-      - name: Save code coverage results
-        uses: actions/upload-artifact@v2
-        with:
-          name: approval-code-coverage-report
-          path: |
-            .nyc_output
-            coverage
+        run: npm run test:approval
+      # - name: Get coverage data
+      #   run: |
+      #     sleep 2 # give some time for nyc (npm run start:coverage) to save coverage info
+      #     npx nyc report --reporter=lcov # stores the coverage report in coverage/lcov.info
+      # - name: Save code coverage results
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: approval-code-coverage-report
+      #     path: |
+      #       .nyc_output
+      #       coverage
 
   unit-tests:
     name: Unit tests

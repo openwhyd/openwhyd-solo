@@ -144,7 +144,13 @@ async function startOpenwhydServerWith(env) {
   serverProcess.stdout.on('data', errPrinter); // for debugging only
   serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
   await waitOn({ resources: [serverProcess.URL] });
-  return serverProcess;
+  return {
+    ...serverProcess,
+    async kill(signal) {
+      serverProcess.kill(signal);
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // wait for server to release the port
+    },
+  };
 }
 
 /* refresh openwhyd's in-memory cache of users, to allow this user to login */

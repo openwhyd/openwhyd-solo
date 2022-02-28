@@ -141,7 +141,7 @@ async function startOpenwhydServerWith(env) {
           silent: true,
         });
   serverProcess.stderr.on('data', errPrinter);
-  // serverProcess.stdout.on('data', errPrinter); // for debugging only
+  serverProcess.stdout.on('data', errPrinter); // for debugging only
   serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
   await waitOn({ resources: [serverProcess.URL] });
   return serverProcess;

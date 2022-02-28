@@ -3,10 +3,10 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 env:
   FORCE_COLOR: '3' # asks Chalk to use colors in logs of Yarn, Jest, ESLint and many others
@@ -15,6 +15,7 @@ jobs:
   code-checks:
     name: Code checks
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -50,6 +51,7 @@ jobs:
   approval-tests:
     name: Approval tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     services:
       mongodb:
@@ -102,6 +104,7 @@ jobs:
   unit-tests:
     name: Unit tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -123,6 +126,7 @@ jobs:
   integration-tests:
     name: Integration tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     services:
       mongodb:
@@ -160,6 +164,7 @@ jobs:
   cypress-tests:
     name: Cypress E2E tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     services:
       mongodb:
@@ -199,13 +204,6 @@ jobs:
           parallel: true
         env:
           CI: true
-          APPLITOOLS_API_KEY: ${{ secrets.APPLITOOLS_API_KEY }}
-          # pass the Dashboard record key as an environment variable
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          # Recommended: pass the GitHub token lets this action correctly
-          # determine the unique run id necessary to re-run the checks
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # DEBUG: 'cypress:server:socket-base'
       - name: Get coverage data
         run: |
           # npm run test:coverage
@@ -230,39 +228,10 @@ jobs:
           name: cypress-videos
           path: cypress/videos
 
-  coverage:
-    name: Send coverage reports to Codacy
-    needs:
-      - cypress-tests
-      - approval-tests
-      # TODO: add coverage for unit and integration tests too
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/download-artifact@v2
-        with:
-          name: cypress-code-coverage-report
-          path: coverage-cypress/
-      - uses: actions/download-artifact@v2
-        with:
-          name: approval-code-coverage-report
-          path: coverage-approval/
-      - name: Merge coverage reports
-        run: |
-          mkdir .nyc_output
-          mkdir coverage-reports
-          cp coverage-cypress/.nyc_output/*.json coverage-reports
-          cp coverage-approval/.nyc_output/*.json coverage-reports
-          npx nyc merge coverage-reports .nyc_output/merged-coverage.json
-          npx nyc report --reporter=lcov --reporter=text  # stores the coverage report in coverage/lcov.info
-      - uses: codacy/codacy-coverage-reporter-action@master
-        with:
-          project-token: ${{ secrets.CODACY_REPOSITORY_TOKEN_FOR_COVERAGE }}
-          coverage-reports: coverage/lcov.info
-
   docker:
     # To publish the Docker image from here, see https://github.com/openwhyd/openwhyd/pull/308/commits/1eacaa98885789642ba0073c9bb4d822021f0d95#diff-12a86cef0c4707531fdbabac3e38cb2aR36
     name: Docker tests
+    timeout-minutes: 5
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2

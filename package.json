@@ -17,7 +17,7 @@
     "test:integration": "npx mocha test/integration/*.js --serial --exit",
     "test:unit": "npx mocha test/unit/*.js --exit",
     "test:approval": "START_WITH_ENV_FILE='./env-vars-testing.conf' mocha test/approval/approval.tests.js $@",
-    "test:approval:coverage": "START_WITH_ENV_FILE='./env-vars-testing.conf' COVERAGE=true mocha --timeout 5000 test/approval/approval.tests.js $@",
+    "test:approval:coverage": "COVERAGE=true npm run test:approval -- --timeout 10000 $@",
     "test:cypress:dev": "node_modules/.bin/cypress open",
     "test:cypress": "node_modules/.bin/cypress run",
     "test": ". ./env-vars-testing.sh && npm run test:unit && npm run test:integration && npm run test:cypress",

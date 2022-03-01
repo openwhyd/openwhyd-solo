@@ -23,7 +23,7 @@ describe(`post api`, function () {
       request.post(
         {
           jar,
-          url: `${URL_PREFIX}/api/post?action=insert&eId=%2Ffi%2Fhttps%3A%2F%2Ffile-examples-com.github.io%2Fuploads%2F2017%2F11%2Ffile_example_MP3_700KB.mp3%3F_%3D1645782509315&name=${newName}&src%5Bid%5D=&src%5Bname%5D=&_id=${pId}&pl%5Bname%5D=full+stream&pl%5Bid%5D=null&text=`,
+          url: `${URL_PREFIX}/api/post?action=insert&eId=%2Fyt%2FXdJVWSqb4Ck&name=${newName}&src%5Bid%5D=&src%5Bname%5D=&_id=${pId}&pl%5Bname%5D=full+stream&pl%5Bid%5D=null&text=`,
         },
         (error, response, body) =>
           error ? reject(error) : resolve({ response, body })
@@ -38,6 +38,7 @@ describe(`post api`, function () {
     );
     const postedTrack = JSON.parse(res.body).data;
     assert.equal(postedTrack.name, newName);
+    assert.equal(postedTrack.eId, post.eId);
   });
 
   it(`should allow adding a track`, function (done) {

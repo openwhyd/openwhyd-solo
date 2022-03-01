@@ -23,7 +23,14 @@ describe(`post api`, function () {
       request.post(
         {
           jar,
-          url: `${URL_PREFIX}/api/post?action=insert&eId=%2Fyt%2FXdJVWSqb4Ck&name=${newName}&src%5Bid%5D=&src%5Bname%5D=&_id=${pId}&pl%5Bname%5D=full+stream&pl%5Bid%5D=null&text=`,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: newName,
+            _id: pId,
+            pl: { id: null, name: 'full stream' },
+          },
+          url: `${URL_PREFIX}/api/post`,
         },
         (error, response, body) =>
           error ? reject(error) : resolve({ response, body })

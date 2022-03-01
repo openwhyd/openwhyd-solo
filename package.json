@@ -14,7 +14,7 @@
     "start": "node app.js $@",
     "start:coverage": "npx nyc --silent node app.js $@",
     "start:localdb": "node app.js $@ --mongoDbDatabase openwhyd_test --mongoDbHost localhost --mongoDbPort 27117",
-    "test-reset": "node test/reset-test-db.js",
+    "test-reset": "export MONGODB_PORT=27117 && node test/reset-test-db.js",
     "test:integration": "npx mocha test/integration/*.js --serial --exit",
     "test:unit": "npx mocha test/unit/*.js --exit",
     "test:approval": "START_WITH_ENV_FILE='./env-vars-testing.conf' mocha test/approval/approval.tests.js $@",

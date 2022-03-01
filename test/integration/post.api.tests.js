@@ -92,7 +92,49 @@ describe(`post api`, function () {
     });
   });
 
-  // TODO: "should re-add a track into a new playlist"
+  it('should re-add a track into a new playlist', async function () {
+    const { jar } = await util.promisify(api.loginAs)(DUMMY_USER);
+    const { body } = await util.promisify(api.addPost)(jar, post);
+    const pId = body._id;
+    const name = body.name;
+    const ctx = 'bk';
+    const newPlayListName = 'My New Playlist';
+
+    await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: name,
+            _id: pId,
+            ctx: ctx,
+            pl: { id: 'create', name: newPlayListName },
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const res = await new Promise((resolve, reject) =>
+      request.get(
+        `${URL_PREFIX}/c/${pId}?format=json`,
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const postedTrack = JSON.parse(res.body).data;
+    assert.equal(postedTrack.name, name);
+    assert.equal(postedTrack.eId, post.eId);
+    assert.equal(postedTrack.ctx, ctx);
+    assert.equal(postedTrack.pl.name, newPlayListName);
+    assert.equal(postedTrack.uId, DUMMY_USER.id);
+    /*Note: looks like the api is returning isNew=true while inspecting the request with the developer tools on the UI
+      but it doesn't seem to be the case with this test...
+    */
+  });
 
   // TODO: "should re-add a track into an existing playlist"
 

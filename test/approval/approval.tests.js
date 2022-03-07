@@ -2,6 +2,8 @@
 
 const approvals = require('approvals').mocha();
 const util = require('util');
+const request = require('request');
+const { URL_PREFIX } = require('../fixtures.js');
 
 const {
   START_WITH_ENV_FILE,
@@ -44,7 +46,12 @@ async function setupTestEnv() {
     startOpenwhydServer,
   } = require('../approval-tests-helpers');
   const api = require('../api-client');
-  const context = { api, makeJSONScrubber, dumpMongoCollection };
+  const context = {
+    api,
+    makeJSONScrubber,
+    dumpMongoCollection,
+    insertTestData,
+  };
   // insert fixtures / test data
   context.testDataCollections = {
     user: await readMongoDocuments(__dirname + '/../approval.users.json.js'),
@@ -121,6 +128,51 @@ describe('When posting a track using the bookmarklet', function () {
 
   it('should be listed in the "post" db collection', async function () {
     const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
+    this.verifyAsJSON(scrub(dbPosts));
+  });
+});
+
+describe('When renaming a track', function () {
+  const newName = 'coucou';
+  let context;
+  let postedTrack;
+
+  before(async () => {
+    context = await setupTestEnv();
+    const user = context.testDataCollections.user[0];
+    const post = makePostFromBk(user);
+    await context.insertTestData(MONGODB_URL, { post });
+    const { jar } = await util.promisify(context.api.loginAs)(user);
+    (await util.promisify(context.api.addPost)(jar, post)).body;
+
+    postedTrack = (await context.dumpMongoCollection(MONGODB_URL, 'post'))[0];
+
+    await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: newName,
+            _id: postedTrack._id.toString(),
+            pl: { id: null, name: 'full stream' },
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+  });
+
+  after(() => teardownTestEnv(context));
+
+  it('should be listed with new name in the "post" db collection', async function () {
+    const scrub = context.makeJSONScrubber([
+      scrubObjectId(postedTrack._id.toString()),
+    ]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
   });

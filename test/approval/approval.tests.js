@@ -40,6 +40,7 @@ const makePostFromBk = (user) => ({
 async function setupTestEnv() {
   const {
     makeJSONScrubber,
+    ObjectId,
     dumpMongoCollection,
     readMongoDocuments,
     insertTestData,
@@ -49,6 +50,7 @@ async function setupTestEnv() {
   const context = {
     api,
     makeJSONScrubber,
+    ObjectId,
     dumpMongoCollection,
     insertTestData,
   };
@@ -183,10 +185,10 @@ describe('When renaming a track', function () {
   });
 });
 
-describe('When posting a track to a new playlist', function () {
+describe('When posting a track to an existing playlist', function () {
   let context;
   let postedTrack;
-  const pl = { id: 'create', name: 'newPlayListName' };
+  const pl = { id: '2', name: '🎸 Rock' };
 
   before(async () => {
     context = await setupTestEnv();
@@ -203,4 +205,11 @@ describe('When posting a track to a new playlist', function () {
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
   });
+
+  it('should not update the user\'s playlists in the "user" db collection', async function () {
+    const dbUsers = await context.dumpMongoCollection(MONGODB_URL, 'user');
+    this.verifyAsJSON(dbUsers);
+  });
 });
+
+// TODO: When posting a track to a new playlist

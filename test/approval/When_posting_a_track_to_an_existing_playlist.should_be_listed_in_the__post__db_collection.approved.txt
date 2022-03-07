@@ -7,7 +7,7 @@
     "name": "BOYLE - Roppongi Hills (Music Video)",
     "pl": {
       "id": 2,
-      "name": "newPlayListName"
+      "name": "🎸 Rock"
     },
     "src": {
       "id": "https://www.youtube.com/watch?v=jI3YrVfOksE",

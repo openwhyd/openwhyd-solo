@@ -2,20 +2,30 @@ var assert = require('assert');
 const util = require('util');
 const request = require('request');
 
-var { DUMMY_USER, cleanup, URL_PREFIX } = require('../fixtures.js');
+var { ADMIN_USER, cleanup, URL_PREFIX } = require('../fixtures.js');
 var api = require('../api-client.js');
 
-describe(`post api`, function () {
-  before(cleanup); // to prevent side effects between tests
+const randomString = () => Math.random().toString(36).substring(2, 9);
 
-  var pId, uId;
-  const post = {
-    eId: '/yt/XdJVWSqb4Ck',
-    name: 'Lullaby - Jack Johnson and Matt Costa',
-  };
+describe(`post api`, function () {
+  let post;
+  let jar;
+
+  before(cleanup); // to prevent side effects between test suites
+
+  beforeEach(async () => {
+    post = {
+      eId: `/yt/${randomString()}`,
+      name: `Lullaby - Jack Johnson and Matt Costa`,
+    };
+
+    ({ jar } = await util.promisify(api.loginAs)(ADMIN_USER));
+    /* We are forced to use the ADMIN_USER, since DUMMY_USER is mutated by user.api.tests.js and the db cleanup seems to not work for the users collection.
+     * May be initdb_testing.js is not up to date with the current schema?
+     */
+  });
 
   it("should edit a track's name", async function () {
-    const { jar } = await util.promisify(api.loginAs)(DUMMY_USER);
     const { body } = await util.promisify(api.addPost)(jar, post);
     const pId = body._id;
     const newName = 'coucou';
@@ -23,7 +33,14 @@ describe(`post api`, function () {
       request.post(
         {
           jar,
-          url: `${URL_PREFIX}/api/post?action=insert&eId=%2Ffi%2Fhttps%3A%2F%2Ffile-examples-com.github.io%2Fuploads%2F2017%2F11%2Ffile_example_MP3_700KB.mp3%3F_%3D1645782509315&name=${newName}&src%5Bid%5D=&src%5Bname%5D=&_id=${pId}&pl%5Bname%5D=full+stream&pl%5Bid%5D=null&text=`,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: newName,
+            _id: pId,
+            pl: { id: null, name: 'full stream' },
+          },
+          url: `${URL_PREFIX}/api/post`,
         },
         (error, response, body) =>
           error ? reject(error) : resolve({ response, body })
@@ -36,33 +53,91 @@ describe(`post api`, function () {
           error ? reject(error) : resolve({ response, body })
       )
     );
-    const postedTrack = JSON.parse(res.body).data;
+    const { data: postedTrack } = JSON.parse(res.body);
     assert.equal(postedTrack.name, newName);
-  });
-
-  it(`should allow adding a track`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      api.addPost(jar, post, function (error, { body }) {
-        assert.ifError(error);
-        assert.equal(body.eId, post.eId);
-        assert.equal(body.name, post.name);
-        assert(body._id);
-        pId = body._id;
-        uId = body.uId;
-        done();
-      });
-    });
+    assert.equal(postedTrack.eId, post.eId);
   });
 
   // TODO: "should add a track from a blog"
 
-  // TODO: "should add a track from bookmarklet"
+  it('should add a track from bookmarklet', async function () {
+    const name = randomString();
+    const ctx = 'bk';
+
+    const res = await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: name,
+            ctx: ctx,
+            pl: { id: null, name: 'full stream' },
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const postedTrack = JSON.parse(res.body);
+    assert.equal(postedTrack.name, name);
+    assert.equal(postedTrack.eId, post.eId);
+    assert.equal(postedTrack.ctx, ctx);
+    assert.equal(postedTrack.isNew, true);
+    assert.equal(postedTrack.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.uNm, ADMIN_USER.name);
+    assert.ok(postedTrack._id);
+    assert.equal(postedTrack.pl, undefined);
+  });
 
   // TODO: "should add a track from hot tracks"
 
   // TODO: "should add a track to an existing playlist"
 
-  // TODO: "should add a track to a new playlist"
+  // TODO: should add a track to a new playlist (where ? if this isnot the bookmarklet ?)
+
+  it('should add a track into a new playlist from the bookmarklet', async function () {
+    const { body } = await util.promisify(api.addPost)(jar, post);
+    const pId = body._id;
+    const name = body.name;
+    const ctx = 'bk';
+    const newPlayListName = randomString();
+
+    await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: name,
+            _id: pId,
+            ctx: ctx,
+            pl: { id: 'create', name: newPlayListName },
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const res = await new Promise((resolve, reject) =>
+      request.get(
+        `${URL_PREFIX}/c/${pId}?format=json`,
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const { data: postedTrack } = JSON.parse(res.body);
+    assert.equal(postedTrack.name, name);
+    assert.equal(postedTrack.eId, post.eId);
+    assert.equal(postedTrack.ctx, ctx);
+    assert.equal(postedTrack.pl.name, newPlayListName);
+    assert.equal(postedTrack.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.uNm, ADMIN_USER.name);
+  });
 
   // TODO: "should warn if about to add a track that I already posted in the past"
 
@@ -70,130 +145,54 @@ describe(`post api`, function () {
 
   // TODO: "should ask to login if trying to add track without session"
 
-  it(`should allow re-adding a track (aka "repost")`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      api.addPost(jar, { pId }, function (error, { body }) {
-        assert.ifError(error);
-        assert(body._id);
-        assert.notEqual(body._id, pId);
-        assert.equal(body.repost.pId, pId);
-        assert.equal(body.eId, post.eId);
-        assert.equal(body.name, post.name);
-        done();
-      });
-    });
-  });
+  it('should re-add a track to a new playlist from the stream', async function () {
+    const { body } = await util.promisify(api.addPost)(jar, post);
+    const pId = body._id;
+    const name = body.name;
+    const newPlayListName = randomString();
 
-  // TODO: "should re-add a track into a new playlist"
+    const res = await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: name,
+            pId: pId,
+            pl: { id: 'create', name: newPlayListName },
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+
+    const postedTrack = JSON.parse(res.body);
+
+    assert.equal(postedTrack.name, name);
+    assert.equal(postedTrack.eId, post.eId);
+    assert.notEqual(postedTrack.pl.id, undefined);
+    assert.equal(postedTrack.pl.name, newPlayListName);
+    assert.equal(postedTrack.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.uNm, ADMIN_USER.name);
+    assert.deepEqual(postedTrack.lov, []);
+    assert.equal(postedTrack.text, '');
+    assert.equal(postedTrack.nbP, 0);
+    assert.equal(postedTrack.nbR, 0);
+
+    assert.notEqual(postedTrack._id, pId);
+
+    assert.equal(postedTrack.repost.pId, pId);
+    assert.equal(postedTrack.repost.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.repost.uNm, ADMIN_USER.name);
+  });
 
   // TODO: "should re-add a track into an existing playlist"
 
   // TODO: "should allow re-adding a track into another playlist"
 
-  var playlistFullId;
-  const firstPlaylistIndex = 0;
-  const postInPlaylist = Object.assign({}, post, {
-    pl: {
-      id: 'create',
-      name: 'my first playlist',
-    },
-  });
-
-  it(`should allow adding a track to a playlist`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      api.addPost(jar, postInPlaylist, function (error, { body }) {
-        assert.ifError(error);
-        assert(body._id);
-        assert.equal(body.eId, postInPlaylist.eId);
-        assert.equal(body.name, postInPlaylist.name);
-        assert.equal(body.pl.id, firstPlaylistIndex);
-        assert.equal(body.pl.name, postInPlaylist.pl.name);
-        done();
-      });
-    });
-  });
-
-  it(`make sure that the playlist was created`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      api.getUser(jar, {}, function (error, { body }) {
-        assert.equal(body.pl.length, 1);
-        assert.equal(body.pl[0].id, firstPlaylistIndex);
-        assert.equal(body.pl[0].name, postInPlaylist.pl.name);
-        assert.equal(body.pl[0].nbTracks, 1);
-        playlistFullId = [body.id, firstPlaylistIndex].join('_');
-        done();
-      });
-    });
-  });
-
-  it(`should find 1 track in the playlist`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      api.getPlaylist(jar, playlistFullId, function (error, { body }) {
-        assert.ifError(error);
-        assert.equal(body.length, 1);
-        assert.equal(body[0].id, playlistFullId);
-        assert.equal(body[0].plId, firstPlaylistIndex);
-        assert.equal(body[0].nbTracks, 1);
-        done();
-      });
-    });
-  });
-
-  it(`should return 1 track in the playlist`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      api.getPlaylistTracks(
-        jar,
-        `u/${uId}`,
-        firstPlaylistIndex,
-        function (error, { body }) {
-          assert.equal(body.length, 1);
-          assert.equal(body[0].pl.id, firstPlaylistIndex);
-          assert.equal(body[0].pl.name, postInPlaylist.pl.name);
-          done();
-        }
-      );
-    });
-  });
-
-  it(`should return 1 track in the playlist, with limit=1000`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      const url = `/u/${uId}/playlist/${firstPlaylistIndex}?format=json&limit=1000`;
-      api.get(jar, url, function (error, { body }) {
-        assert.equal(body.length, 1);
-        assert.equal(body[0].pl.id, firstPlaylistIndex);
-        assert.equal(body[0].pl.name, postInPlaylist.pl.name);
-        done();
-      });
-    });
-  });
-
-  it(`should return tracks if two limit parameters are provided`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      const url = `/u/${uId}/playlist/${firstPlaylistIndex}?format=json&limit=1000&limit=20`;
-      // => the `limit` property will be parsed as ["1000","20"] => causing bug #89
-      api.get(jar, url, function (error, { body }) {
-        assert.notEqual(body.length, 0);
-        done();
-      });
-    });
-  });
-
   // TODO: update post
   // TODO: delete post
-
-  it(`should return the comment data after adding it`, function (done) {
-    api.loginAs(DUMMY_USER, function (error, { jar }) {
-      const comment = {
-        pId,
-        text: 'hello world',
-      };
-      api.addComment(jar, comment, function (error, { body }) {
-        assert.ifError(error);
-        assert.equal(body.pId, comment.pId);
-        assert.equal(body.text, comment.text);
-        assert(body._id);
-        done();
-      });
-    });
-  });
 });

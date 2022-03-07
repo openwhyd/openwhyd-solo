@@ -148,20 +148,17 @@ describe('When renaming a track', function () {
   before(async () => {
     context = await setupTestEnv();
     const user = context.testDataCollections.user[0];
-    const post = makePostFromBk(user);
-    await context.insertTestData(MONGODB_URL, { post });
-    const { jar } = await util.promisify(context.api.loginAs)(user);
-    (await util.promisify(context.api.addPost)(jar, post)).body;
-
+    await context.insertTestData(MONGODB_URL, { post: [makePostFromBk(user)] });
     postedTrack = (await context.dumpMongoCollection(MONGODB_URL, 'post'))[0];
 
+    const { jar } = await util.promisify(context.api.loginAs)(user);
     await new Promise((resolve, reject) =>
       request.post(
         {
           jar,
           form: {
             action: 'insert',
-            eId: post.eId,
+            eId: postedTrack.eId,
             name: newName,
             _id: postedTrack._id.toString(),
             pl: { id: null, name: 'full stream' },
@@ -241,28 +238,32 @@ describe('When posting a track to a new playlist', function () {
 
 describe('When reposting a track to an existing playlist', function () {
   let context;
+  let originalTrack;
   let repostedTrack;
-  const pl = { id: '2', name: '🎸 Rock' };
 
   before(async () => {
     context = await setupTestEnv();
     const user = context.testDataCollections.user[0];
-    const post = makePostFromBk(user);
-    await context.insertTestData(MONGODB_URL, { post });
-    const { jar } = await util.promisify(context.api.loginAs)(user);
+    await context.insertTestData(MONGODB_URL, { post: [makePostFromBk(user)] });
+    originalTrack = (await context.dumpMongoCollection(MONGODB_URL, 'post'))[0];
 
-    const rePost = { ...makePostFromBk(user), pl };
+    const { jar } = await util.promisify(context.api.loginAs)(user);
     repostedTrack = (
       await util.promisify(context.api.addPost)(jar, {
-        pId: post._id.toString(),
+        eId: originalTrack.eId,
+        name: originalTrack.name,
+        pId: originalTrack._id.toString(),
       })
     ).body;
   });
 
   after(() => teardownTestEnv(context));
 
-  it('should be listed in the "post" db collection', async function () {
-    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+  it('should both be listed in the "post" db collection', async function () {
+    const scrub = context.makeJSONScrubber([
+      scrubObjectId(originalTrack._id),
+      scrubObjectId(repostedTrack._id),
+    ]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
   });

@@ -15,7 +15,7 @@
     "start:coverage": "npx nyc --silent node app.js $@",
     "start:localdb": "node app.js $@ --mongoDbDatabase openwhyd_test --mongoDbHost localhost --mongoDbPort 27017",
     "test-reset": "node test/reset-test-db.js",
-    "test:integration": "npx mocha test/integration/*.js --serial --exit",
+    "test:integration": "npx env-cmd mocha test/integration/*.js --serial --exit",
     "test:unit": "npx mocha test/unit/*.js --exit",
     "test:approval": "START_WITH_ENV_FILE='./env-vars-testing.conf' mocha test/approval/approval.tests.js $@",
     "test:approval:coverage": "COVERAGE=true npm run test:approval -- --serial --timeout 10000 $@",

@@ -13,7 +13,9 @@ Run OpenWhyd Solo locally:
 ```bash
 docker compose up mongo --detach # starts mongo database in the background
 npm install # installs the necessary node modules
+. ./env-vars-testing-local.sh # sets the environment variables
 npm run test-reset # resets and initialises the database
+npm run start:localdb # starts the server locally
 open http://localhost:8080 # opens the local server, use ngx-open on a linux system.
 ```
 

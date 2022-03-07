@@ -119,10 +119,11 @@ function getCleanedPageBody(body) {
 const errPrinter = ((blocklist) => {
   return (chunk) => {
     const message = chunk.toString();
-    if (!blocklist.some((term) => message.includes(term)))
+    if (process.env.DEBUG || !blocklist.some((term) => message.includes(term)))
       console.error(message);
   };
 })([
+  'server.close => OK',
   'closing server',
   'deprecated',
   'gm: command not found',
@@ -133,15 +134,15 @@ const errPrinter = ((blocklist) => {
 async function startOpenwhydServerWith(env) {
   const serverProcess =
     process.env.COVERAGE === 'true'
-      ? childProcess.exec('npm run start:coverage', {
+      ? childProcess.exec('npm run start:coverage:no-clean', {
           env: { ...env, PATH: process.env.PATH },
         })
       : childProcess.fork('./app.js', [], {
           env,
-          silent: true,
+          silent: true, // necessary to initialize serverProcess.stderr
         });
   serverProcess.stderr.on('data', errPrinter);
-  // serverProcess.stdout.on('data', errPrinter); // for debugging only
+  if (process.env.DEBUG) serverProcess.stdout.on('data', errPrinter);
   serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
   await waitOn({ resources: [serverProcess.URL] });
   return serverProcess;

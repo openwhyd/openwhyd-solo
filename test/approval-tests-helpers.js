@@ -119,7 +119,7 @@ function getCleanedPageBody(body) {
 const errPrinter = ((blocklist) => {
   return (chunk) => {
     const message = chunk.toString();
-    if (!blocklist.some((term) => message.includes(term)))
+    if (process.env.DEBUG || !blocklist.some((term) => message.includes(term)))
       console.error(message);
   };
 })([
@@ -142,7 +142,7 @@ async function startOpenwhydServerWith(env) {
           silent: true, // necessary to initialize serverProcess.stderr
         });
   serverProcess.stderr.on('data', errPrinter);
-  // serverProcess.stdout.on('data', errPrinter); // for debugging only
+  if (process.env.DEBUG) serverProcess.stdout.on('data', errPrinter);
   serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
   await waitOn({ resources: [serverProcess.URL] });
   return serverProcess;

@@ -1,7 +1,6 @@
 .dockerignore
 .gitignore
 .git
-.env
 .port
 .DS_Store
 Dockerfile

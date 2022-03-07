@@ -86,6 +86,11 @@ describe('When setting up a new test environment', function () {
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(dbPosts);
   });
+
+  it('should have the initial "user" db collection', async function () {
+    const dbUsers = await context.dumpMongoCollection(MONGODB_URL, 'user');
+    this.verifyAsJSON(dbUsers);
+  });
 });
 
 describe('When posting a track', () => {

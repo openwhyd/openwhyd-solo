@@ -177,3 +177,25 @@ describe('When renaming a track', function () {
     this.verifyAsJSON(scrub(dbPosts));
   });
 });
+
+describe('When posting a track to a new playlist', function () {
+  let context;
+  let postedTrack;
+  const pl = { id: 'create', name: 'newPlayListName' };
+
+  before(async () => {
+    context = await setupTestEnv();
+    const user = context.testDataCollections.user[0];
+    const post = { ...makePostFromBk(user), pl };
+    const { jar } = await util.promisify(context.api.loginAs)(user);
+    postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
+  });
+
+  after(() => teardownTestEnv(context));
+
+  it('should be listed in the "post" db collection', async function () {
+    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
+    this.verifyAsJSON(scrub(dbPosts));
+  });
+});

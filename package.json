@@ -18,7 +18,7 @@
     "test:integration": "npx mocha test/integration/*.js --serial --exit",
     "test:unit": "npx mocha test/unit/*.js --exit",
     "test:approval": "START_WITH_ENV_FILE='./env-vars-testing.conf' mocha test/approval/approval.tests.js $@",
-    "test:approval:coverage": "COVERAGE=true npm run test:approval -- --serial --timeout 10000 $@",
+    "test:approval:coverage": "rm -rf .nyc_output coverage && COVERAGE=true npm run test:approval -- --serial --timeout 10000 $@ && npx nyc report --reporter=lcov && npx nyc report | grep post",
     "test:cypress:dev": "node_modules/.bin/cypress open",
     "test:cypress": "node_modules/.bin/cypress run",
     "test": ". ./env-vars-testing.sh && npm run test:unit && npm run test:integration && npm run test:cypress",

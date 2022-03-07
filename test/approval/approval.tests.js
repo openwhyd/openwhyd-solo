@@ -62,7 +62,7 @@ describe('When setting up a new test environment', function () {
   });
 });
 
-describe('When posting a track', function () {
+describe('When posting a track using the bookmarklet', function () {
   let context;
   let postedTrack;
 

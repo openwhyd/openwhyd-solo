@@ -21,6 +21,20 @@ const scrubObjectId =
   (data = '') =>
     data.replace(objectId, '__OBJECT_ID__');
 
+const makePostFromBk = (user) => ({
+  uId: user._id,
+  uNm: user.name,
+  text: '',
+  name: 'BOYLE - Roppongi Hills (Music Video)',
+  eId: '/yt/jI3YrVfOksE',
+  ctx: 'bk',
+  img: 'https://i.ytimg.com/vi/jI3YrVfOksE/default.jpg',
+  src: {
+    id: 'https://www.youtube.com/watch?v=jI3YrVfOksE',
+    name: 'BOYLE - Roppongi Hills (Music Video) - YouTube',
+  },
+});
+
 async function setupTestEnv() {
   const {
     makeJSONScrubber,
@@ -98,19 +112,7 @@ describe('When posting a track using the bookmarklet', function () {
   before(async () => {
     context = await setupTestEnv();
     const user = context.testDataCollections.user[0];
-    const post = {
-      uId: user._id,
-      uNm: user.name,
-      text: '',
-      name: 'BOYLE - Roppongi Hills (Music Video)',
-      eId: '/yt/jI3YrVfOksE',
-      ctx: 'bk',
-      img: 'https://i.ytimg.com/vi/jI3YrVfOksE/default.jpg',
-      src: {
-        id: 'https://www.youtube.com/watch?v=jI3YrVfOksE',
-        name: 'BOYLE - Roppongi Hills (Music Video) - YouTube',
-      },
-    };
+    const post = makePostFromBk(user);
     const { jar } = await util.promisify(context.api.loginAs)(user);
     postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
   });

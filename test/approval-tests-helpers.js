@@ -136,11 +136,10 @@ async function startOpenwhydServerWith(env) {
     process.env.COVERAGE === 'true'
       ? childProcess.exec('npm run start:coverage:no-clean', {
           env: { ...env, PATH: process.env.PATH },
-          // silent: true,
         })
       : childProcess.fork('./app.js', [], {
           env,
-          // silent: true,
+          silent: true, // necessary to initialize serverProcess.stderr
         });
   serverProcess.stderr.on('data', errPrinter);
   // serverProcess.stdout.on('data', errPrinter); // for debugging only

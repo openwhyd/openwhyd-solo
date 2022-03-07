@@ -62,6 +62,35 @@ describe('When setting up a new test environment', function () {
   });
 });
 
+describe('When posting a track', () => {
+  let context;
+  let postedTrack;
+
+  before(async () => {
+    context = await setupTestEnv();
+    const user = context.testDataCollections.user[0];
+    const post = {
+      eId: '/yt/XdJVWSqb4Ck',
+      name: 'Lullaby - Jack Johnson and Matt Costa',
+    };
+    const { jar } = await util.promisify(context.api.loginAs)(user);
+    postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
+  });
+
+  after(() => teardownTestEnv(context));
+
+  const scrubObjectId =
+    (objectId) =>
+    (data = '') =>
+      data.replace(objectId, '__OBJECT_ID__');
+
+  it('should be listed in the "post" db collection', async function () {
+    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
+    this.verifyAsJSON(scrub(dbPosts));
+  });
+});
+
 describe('When posting a track using the bookmarklet', function () {
   let context;
   let postedTrack;

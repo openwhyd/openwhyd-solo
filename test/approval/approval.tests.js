@@ -212,4 +212,29 @@ describe('When posting a track to an existing playlist', function () {
   });
 });
 
-// TODO: When posting a track to a new playlist
+describe('When posting a track to a new playlist', function () {
+  let context;
+  let postedTrack;
+  const pl = { id: 'create', name: 'My New Playlist' };
+
+  before(async () => {
+    context = await setupTestEnv();
+    const user = context.testDataCollections.user[0];
+    const post = { ...makePostFromBk(user), pl };
+    const { jar } = await util.promisify(context.api.loginAs)(user);
+    postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
+  });
+
+  after(() => teardownTestEnv(context));
+
+  it('should be listed in the "post" db collection', async function () {
+    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
+    this.verifyAsJSON(scrub(dbPosts));
+  });
+
+  it('should update the user\'s playlists in the "user" db collection', async function () {
+    const dbUsers = await context.dumpMongoCollection(MONGODB_URL, 'user');
+    this.verifyAsJSON(dbUsers); // Note: this reveals a bug in the automatic numbering of new playlists, when playlists are listed in reverse order, cf https://github.com/openwhyd/openwhyd-solo/blob/73734c0ab665f6701af7aa8b5b9ce635ad8a2b2f/app/models/user.js#L434
+  });
+});

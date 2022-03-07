@@ -133,7 +133,7 @@ const errPrinter = ((blocklist) => {
 async function startOpenwhydServerWith(env) {
   const serverProcess =
     process.env.COVERAGE === 'true'
-      ? childProcess.exec('npm run start:coverage', {
+      ? childProcess.exec('npm run start:coverage:no-clean', {
           env: { ...env, PATH: process.env.PATH },
         })
       : childProcess.fork('./app.js', [], {

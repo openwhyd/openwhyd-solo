@@ -21,7 +21,7 @@ approvals.configure({
 const scrubObjectId =
   (objectId) =>
   (data = '') =>
-    data.replace(objectId, '__OBJECT_ID__');
+    data.replaceAll(objectId, '__OBJECT_ID__');
 
 const makePostFromBk = (user) => ({
   uId: user._id,

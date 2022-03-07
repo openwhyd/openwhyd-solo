@@ -12,7 +12,7 @@ const ObjectID = (id) => mongodb.ObjectID.createFromHexString(id);
 
 // Parameters
 const { MONGODB_HOST, MONGODB_PORT, MONGODB_DATABASE } = process.env;
-const url = `mongodb://${MONGODB_HOST || 'localhost'}:${MONGODB_PORT || 27117}`;
+const url = `mongodb://${MONGODB_HOST || 'localhost'}:${MONGODB_PORT || 27017}`;
 const dbName = MONGODB_DATABASE || 'openwhyd_test';
 const username = process.argv[2] || 'test'; // default profile: https://openwhyd.org/test
 const password = {

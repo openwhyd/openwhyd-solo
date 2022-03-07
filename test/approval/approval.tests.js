@@ -10,7 +10,7 @@ const {
 } = process.env;
 
 const MONGODB_URL =
-  process.env.MONGODB_URL || 'mongodb://localhost:27117/openwhyd_test';
+  process.env.MONGODB_URL || 'mongodb://localhost:27017/openwhyd_test';
 
 approvals.configure({
   reporters: ['nodediff'], // displays colors in diff

@@ -2,7 +2,7 @@ version: '3'
 services:
   mongo:
     image: mongo:3.4
-    command: mongod --port 27117
+    command: mongod --port 27017
     volumes:
       - /data # Data Persistance
 
@@ -17,4 +17,4 @@ services:
       - 'env-vars-testing.conf'
     environment:
       - MONGODB_HOST=mongo
-      - MONGODB_PORT=27117
+      - MONGODB_PORT=27017

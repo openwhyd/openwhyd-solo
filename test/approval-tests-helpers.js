@@ -160,7 +160,7 @@ async function startOpenwhydServer({ startWithEnv, port }) {
   } else if (startWithEnv) {
     const env = {
       ...(await loadEnvVars(startWithEnv)),
-      MONGODB_PORT: '27117', // port exposed by docker container
+      MONGODB_PORT: '27017', // port exposed by docker container
       TZ: 'UTC',
     };
     return await startOpenwhydServerWith(env); // returns serverProcess instance with additional URL property (e.g. http://localhost:8080)

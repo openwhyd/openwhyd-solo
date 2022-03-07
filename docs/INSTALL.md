@@ -65,7 +65,7 @@ The data imported can be seen from http://localhost:8080/all
 If you want to connect to the MongoDB database with the `mongo` shell using `docker-compose` container:
 
 ```sh
-$ docker-compose exec mongo mongo mongodb://localhost:27117/openwhyd_test
+$ docker-compose exec mongo mongo mongodb://localhost:27017/openwhyd_test
 ```
 
 ---

@@ -140,6 +140,48 @@ describe('When posting a track using the bookmarklet', function () {
   });
 });
 
+describe('When posting a track using the bookmarklet, using a HTTP GET request', function () {
+  let context;
+  let postedTrack;
+  const pl = { id: '2', name: '🎸 Rock' }; // existing playlist
+
+  before(async () => {
+    context = await setupTestEnv();
+    const user = context.testDataCollections.user[0];
+    const post = makePostFromBk(user);
+    const { jar } = await util.promisify(context.api.loginAs)(user);
+    postedTrack = JSON.parse(
+      await new Promise((resolve, reject) =>
+        request.get(
+          {
+            jar,
+            url: `${URL_PREFIX}/api/post?action=insert&eId=${encodeURIComponent(
+              post.eId
+            )}&name=${encodeURIComponent(
+              post.name
+            )}&src[id]=${encodeURIComponent(
+              post.src.id
+            )}&src[name]=${encodeURIComponent(
+              post.src.name
+            )}&pl[id]=${encodeURIComponent(
+              pl.id
+            )}&pl[name]=${encodeURIComponent(pl.name)}`,
+          },
+          (error, response, body) => (error ? reject(error) : resolve(body))
+        )
+      )
+    );
+  });
+
+  after(() => teardownTestEnv(context));
+
+  it('should be listed in the "post" db collection', async function () {
+    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
+    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
+    this.verifyAsJSON(scrub(dbPosts));
+  });
+});
+
 describe('When renaming a track', function () {
   const newName = 'coucou';
   let context;

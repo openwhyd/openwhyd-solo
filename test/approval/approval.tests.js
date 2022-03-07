@@ -93,11 +93,6 @@ describe('When posting a track', function () {
     (data = '') =>
       data.replace(objectId, '__OBJECT_ID__');
 
-  it('should respond with the track data', function () {
-    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
-    this.verifyAsJSON(scrub(postedTrack)); // or this.verify(data)
-  });
-
   it('should be listed in the "post" db collection', async function () {
     const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');

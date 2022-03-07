@@ -240,6 +240,7 @@ describe('When reposting a track to an existing playlist', function () {
   let context;
   let originalTrack;
   let repostedTrack;
+  const pl = { id: '2', name: '🎸 Rock' };
 
   before(async () => {
     context = await setupTestEnv();
@@ -253,6 +254,7 @@ describe('When reposting a track to an existing playlist', function () {
         eId: originalTrack.eId,
         name: originalTrack.name,
         pId: originalTrack._id.toString(),
+        pl,
       })
     ).body;
   });

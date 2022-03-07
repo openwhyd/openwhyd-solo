@@ -46,6 +46,22 @@ function teardownTestEnv(context) {
   }
 }
 
+// basic example / template for next tests
+describe('When setting up a new test environment', function () {
+  let context;
+
+  before(async () => {
+    context = await setupTestEnv();
+  });
+
+  after(() => teardownTestEnv(context));
+
+  it('should have an empty "post" db collection', async function () {
+    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
+    this.verifyAsJSON(dbPosts);
+  });
+});
+
 describe('When posting a track', function () {
   let context;
   let postedTrack;
@@ -86,21 +102,5 @@ describe('When posting a track', function () {
     const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
-  });
-});
-
-// basic example / template for next tests
-describe('When setting up a new test environment', function () {
-  let context;
-
-  before(async () => {
-    context = await setupTestEnv();
-  });
-
-  after(() => teardownTestEnv(context));
-
-  it('should have an empty "post" db collection', async function () {
-    const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
-    this.verifyAsJSON(dbPosts);
   });
 });

@@ -16,6 +16,11 @@ approvals.configure({
   reporters: ['nodediff'], // displays colors in diff
 });
 
+const scrubObjectId =
+  (objectId) =>
+  (data = '') =>
+    data.replace(objectId, '__OBJECT_ID__');
+
 async function setupTestEnv() {
   const {
     makeJSONScrubber,
@@ -79,11 +84,6 @@ describe('When posting a track', () => {
 
   after(() => teardownTestEnv(context));
 
-  const scrubObjectId =
-    (objectId) =>
-    (data = '') =>
-      data.replace(objectId, '__OBJECT_ID__');
-
   it('should be listed in the "post" db collection', async function () {
     const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
@@ -116,11 +116,6 @@ describe('When posting a track using the bookmarklet', function () {
   });
 
   after(() => teardownTestEnv(context));
-
-  const scrubObjectId =
-    (objectId) =>
-    (data = '') =>
-      data.replace(objectId, '__OBJECT_ID__');
 
   it('should be listed in the "post" db collection', async function () {
     const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);

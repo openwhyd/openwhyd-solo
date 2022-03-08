@@ -15,7 +15,7 @@ describe(`post api`, function () {
 
   before(cleanup); // to prevent side effects between test suites
   before(async () => {
-    if (DEV) {
+    if (START_WITH_ENV_FILE) {
       context.serverProcess = await startOpenwhydServer({
         startWithEnv: START_WITH_ENV_FILE,
       });

@@ -14,10 +14,10 @@ describe(`post api`, function () {
   let context = {};
 
   before(cleanup); // to prevent side effects between test suites
-  before(async() => {
-    if(DEV) {
+  before(async () => {
+    if (DEV) {
       context.serverProcess = await startOpenwhydServer({
-        startWithEnv: START_WITH_ENV_FILE
+        startWithEnv: START_WITH_ENV_FILE,
       });
     }
   });
@@ -25,7 +25,7 @@ describe(`post api`, function () {
     if (context.serverProcess?.kill) {
       context.serverProcess.kill('SIGINT');
     }
-  })
+  });
   beforeEach(async () => {
     post = {
       eId: `/yt/${randomString()}`,

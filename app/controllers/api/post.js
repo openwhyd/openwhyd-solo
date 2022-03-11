@@ -250,7 +250,7 @@ exports.controller = function (request, getParams, response) {
 };
 
 function hasAValidPlaylistId(id) {
-  return id !== '' && !isNaN(id);
+  return parseInt(id) >= 0;
 }
 
 function needToCreatePlaylist(playlistRequest) {

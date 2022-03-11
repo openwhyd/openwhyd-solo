@@ -28,7 +28,9 @@ context('Openwhyd', () => {
       url,
       name: url.split('/').pop(),
       eId: '/fi/' + encodeURIComponent(url),
-    }))('http://localhost:8080/html/test-resources/sample-3s.mp3');
+    }))(
+      'https://github.com/openwhyd/openwhyd/raw/241a6f1025ba601a4f63d730d41690474db6a8c2/public/html/test-resources/sample-15s.mp3'
+    );
     cy.get('#q').type(track.url);
     cy.get('#searchResults').contains(track.name);
 
@@ -220,10 +222,12 @@ context('Openwhyd', () => {
     cy.visit('/');
     cy.get('#q')
       .click()
-      .type('http://localhost:8080/html/test-resources/sample-3s.mp3');
-    const searchResult = `a[onclick="window.goToPage('/fi/http://localhost:8080/html/test-resources/sample-3s.mp3');return false;"]`;
+      .type(
+        'https://github.com/openwhyd/openwhyd/raw/241a6f1025ba601a4f63d730d41690474db6a8c2/public/html/test-resources/sample-15s.mp3'
+      );
+    const searchResult = `a[onclick="window.goToPage('/fi/https://github.com/openwhyd/openwhyd/raw/241a6f1025ba601a4f63d730d41690474db6a8c2/public/html/test-resources/sample-15s.mp3');return false;"]`;
     cy.get(searchResult)
       .should('be.visible')
-      .should('have.text', 'sample-3s.mp3');
+      .should('have.text', 'sample-15s.mp3');
   });
 });

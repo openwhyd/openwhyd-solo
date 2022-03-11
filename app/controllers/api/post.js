@@ -111,8 +111,6 @@ exports.actions = {
       if (playlist) {
         postRequest.pl = playlist
       }
-      actualInsert();
-      return; // avoid inserting twice
     } else {
       postRequest.pl = { id: parseInt(playlistRequest.id), name: playlistRequest.name }
       if (isNaN(postRequest.pl.id)) delete postRequest.pl; //q.pl = null;

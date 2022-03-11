@@ -28,9 +28,7 @@ context('Openwhyd', () => {
       url,
       name: url.split('/').pop(),
       eId: '/fi/' + encodeURIComponent(url),
-    }))(
-      'https://github.com/openwhyd/openwhyd-solo/blob/main/public/html/test-resources/sample-3s.mp3?raw=true'
-    );
+    }))('http://localhost:8080/html/test-resources/sample-3s.mp3');
     cy.get('#q').type(track.url);
     cy.get('#searchResults').contains(track.name);
 
@@ -222,10 +220,8 @@ context('Openwhyd', () => {
     cy.visit('/');
     cy.get('#q')
       .click()
-      .type(
-        'https://github.com/openwhyd/openwhyd-solo/blob/main/public/html/test-resources/sample-3s.mp3?raw=true'
-      );
-    const searchResult = `a[onclick="window.goToPage('/fi/https://github.com/openwhyd/openwhyd-solo/blob/main/public/html/test-resources/sample-3s.mp3?raw=true');return false;"]`;
+      .type('http://localhost:8080/html/test-resources/sample-3s.mp3');
+    const searchResult = `a[onclick="window.goToPage('/fi/http://localhost:8080/html/test-resources/sample-3s.mp3');return false;"]`;
     cy.get(searchResult)
       .should('be.visible')
       .should('have.text', 'file_example_MP3_700KB.mp3');

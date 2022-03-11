@@ -57,18 +57,18 @@ exports.actions = {
 
   deleteComment: commentModel.delete,
 
-  insert: function (p, callback) {
-    var q = {
-      uId: p.uId,
-      uNm: p.uNm,
-      text: p.text || '',
+  insert: function (httpRequestParams, callback) {
+    var postRequest = {
+      uId: httpRequestParams.uId,
+      uNm: httpRequestParams.uNm,
+      text: httpRequestParams.text || '',
       pl: undefined, // to be parsed/populated before calling actualInsert()
       // fields that will be ignored by rePost():
-      name: p.name,
-      eId: p.eId,
+      name: httpRequestParams.name,
+      eId: httpRequestParams.eId,
     };
 
-    if (p.ctx) q.ctx = p.ctx;
+    if (httpRequestParams.ctx) postRequest.ctx = httpRequestParams.ctx;
 
     function tryJsonParse(p) {
       try {
@@ -79,49 +79,45 @@ exports.actions = {
     }
 
     function actualInsert() {
-      if (p.pId) postModel.rePost(p.pId, q, callback);
+      if (httpRequestParams.pId) postModel.rePost(httpRequestParams.pId, postRequest, callback);
       else {
-        if (p._id)
+        if (httpRequestParams._id)
           // edit mode
-          q._id = p._id;
+          postRequest._id = httpRequestParams._id;
 
-        if (p.img && p.img != 'null') q.img = p.img;
+        if (httpRequestParams.img && httpRequestParams.img != 'null') postRequest.img = httpRequestParams.img;
 
-        if (p.src)
+        if (httpRequestParams.src)
           // source webpage of the content: {id,name} provided by bookmarklet
-          q.src = typeof p.src == 'object' ? p.src : tryJsonParse(p.src);
-        else if (p['src[id]'] && p['src[name]'])
-          q.src = {
-            id: p['src[id]'],
-            name: p['src[name]'],
+          postRequest.src = typeof httpRequestParams.src == 'object' ? httpRequestParams.src : tryJsonParse(httpRequestParams.src);
+        else if (httpRequestParams['src[id]'] && httpRequestParams['src[name]'])
+          postRequest.src = {
+            id: httpRequestParams['src[id]'],
+            name: httpRequestParams['src[name]'],
           };
-        if (!q.src || !q.src.id) delete q.src;
+        if (!postRequest.src || !postRequest.src.id) delete postRequest.src;
 
-        postModel.savePost(q, callback);
+        postModel.savePost(postRequest, callback);
       }
     }
 
-    // process playlist
-    try {
-      q.pl = typeof p.pl == 'object' ? p.pl : JSON.parse(p.pl);
-    } catch (e) {
-      q.pl = {
-        id: p['pl[id]'],
-        name: p['pl[name]'],
-      };
-    }
-    if (q.pl.id == 'create') {
-      userModel.createPlaylist(p.uId, q.pl.name, function (playlist) {
+    // Muter post avec la notion de playlist provenant des params
+    // Clean code => Pure function
+    const playlistRequest = extractPlaylistRequestFrom(httpRequestParams);
+    postRequest.pl = playlistRequest
+
+    if (postRequest.pl.id == 'create') {
+      userModel.createPlaylist(httpRequestParams.uId, postRequest.pl.name, function (playlist) {
         if (playlist) {
-          q.pl.id = playlist.id;
+          postRequest.pl.id = playlist.id;
           // console.log('playlist was created', q.pl);
         }
         actualInsert();
       });
       return; // avoid inserting twice
     } else {
-      q.pl.id = parseInt(q.pl.id);
-      if (isNaN(q.pl.id)) delete q.pl; //q.pl = null;
+      postRequest.pl.id = parseInt(postRequest.pl.id);
+      if (isNaN(postRequest.pl.id)) delete postRequest.pl; //q.pl = null;
     }
 
     actualInsert();
@@ -248,3 +244,16 @@ exports.controller = function (request, getParams, response) {
 
   exports.handleRequest(request, params, response);
 };
+
+function extractPlaylistRequestFrom(httpRequestParams) {
+  // Attention double responsabilité: parsing et mapping
+  try {
+    return typeof httpRequestParams.pl == 'object' ? httpRequestParams.pl : JSON.parse(httpRequestParams.pl);
+  } catch (e) {
+    return {
+      id: httpRequestParams['pl[id]'],
+      name: httpRequestParams['pl[name]'],
+    };
+  }
+}
+

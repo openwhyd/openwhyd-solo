@@ -104,19 +104,17 @@ exports.actions = {
     // Muter post avec la notion de playlist provenant des params
     // Clean code => Pure function
     const playlistRequest = extractPlaylistRequestFrom(httpRequestParams);
-    postRequest.pl = playlistRequest
-
-    if (postRequest.pl.id == 'create') {
-      userModel.createPlaylist(httpRequestParams.uId, postRequest.pl.name, function (playlist) {
+    
+    if (playlistRequest.id == 'create') {
+      userModel.createPlaylist(httpRequestParams.uId, playlistRequest.name, function (playlist) {
         if (playlist) {
-          postRequest.pl.id = playlist.id;
-          // console.log('playlist was created', q.pl);
+          postRequest.pl = playlist
         }
         actualInsert();
       });
       return; // avoid inserting twice
     } else {
-      postRequest.pl.id = parseInt(postRequest.pl.id);
+      postRequest.pl = {id: parseInt(playlistRequest.id), name: playlistRequest.name}
       if (isNaN(postRequest.pl.id)) delete postRequest.pl; //q.pl = null;
     }
 

@@ -224,6 +224,6 @@ context('Openwhyd', () => {
     const searchResult = `a[onclick="window.goToPage('/fi/http://localhost:8080/html/test-resources/sample-3s.mp3');return false;"]`;
     cy.get(searchResult)
       .should('be.visible')
-      .should('have.text', 'file_example_MP3_700KB.mp3');
+      .should('have.text', 'sample-3s.mp3');
   });
 });

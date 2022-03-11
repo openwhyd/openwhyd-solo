@@ -79,17 +79,22 @@ exports.actions = {
     }
 
     function actualInsert() {
-      if (httpRequestParams.pId) postModel.rePost(httpRequestParams.pId, postRequest, callback);
+      if (httpRequestParams.pId)
+        postModel.rePost(httpRequestParams.pId, postRequest, callback);
       else {
         if (httpRequestParams._id)
           // edit mode
           postRequest._id = httpRequestParams._id;
 
-        if (httpRequestParams.img && httpRequestParams.img != 'null') postRequest.img = httpRequestParams.img;
+        if (httpRequestParams.img && httpRequestParams.img != 'null')
+          postRequest.img = httpRequestParams.img;
 
         if (httpRequestParams.src)
           // source webpage of the content: {id,name} provided by bookmarklet
-          postRequest.src = typeof httpRequestParams.src == 'object' ? httpRequestParams.src : tryJsonParse(httpRequestParams.src);
+          postRequest.src =
+            typeof httpRequestParams.src == 'object'
+              ? httpRequestParams.src
+              : tryJsonParse(httpRequestParams.src);
         else if (httpRequestParams['src[id]'] && httpRequestParams['src[name]'])
           postRequest.src = {
             id: httpRequestParams['src[id]'],
@@ -107,9 +112,17 @@ exports.actions = {
 
     if (needToCreatePlaylist(playlistRequest)) {
       postRequest.pl = await new Promise((resolve) =>
-        userModel.createPlaylist(httpRequestParams.uId, playlistRequest.name, resolve));
-    } else if (hasAValidPlaylistId(postRequest)) {
-      postRequest.pl = { id: parseInt(playlistRequest.id), name: playlistRequest.name }
+        userModel.createPlaylist(
+          httpRequestParams.uId,
+          playlistRequest.name,
+          resolve
+        )
+      );
+    } else if (hasAValidPlaylistId(playlistRequest.id)) {
+      postRequest.pl = {
+        id: parseInt(playlistRequest.id),
+        name: playlistRequest.name,
+      };
     }
 
     actualInsert();
@@ -237,8 +250,8 @@ exports.controller = function (request, getParams, response) {
   exports.handleRequest(request, params, response);
 };
 
-function hasAValidPlaylistId(postRequest) {
-  return !isNaN(postRequest.pl.id);
+function hasAValidPlaylistId(id) {
+  return !isNaN(id);
 }
 
 function needToCreatePlaylist(playlistRequest) {
@@ -248,7 +261,9 @@ function needToCreatePlaylist(playlistRequest) {
 function extractPlaylistRequestFrom(httpRequestParams) {
   // Attention double responsabilité: parsing et mapping
   try {
-    return typeof httpRequestParams.pl == 'object' ? httpRequestParams.pl : JSON.parse(httpRequestParams.pl);
+    return typeof httpRequestParams.pl == 'object'
+      ? httpRequestParams.pl
+      : JSON.parse(httpRequestParams.pl);
   } catch (e) {
     return {
       id: httpRequestParams['pl[id]'],
@@ -256,4 +271,3 @@ function extractPlaylistRequestFrom(httpRequestParams) {
     };
   }
 }
-

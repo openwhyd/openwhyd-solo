@@ -4,15 +4,28 @@ const request = require('request');
 
 var { ADMIN_USER, cleanup, URL_PREFIX } = require('../fixtures.js');
 var api = require('../api-client.js');
-
+var { START_WITH_ENV_FILE, DEV } = process.env;
+const { startOpenwhydServer } = require('../approval-tests-helpers');
 const randomString = () => Math.random().toString(36).substring(2, 9);
 
 describe(`post api`, function () {
   let post;
   let jar;
+  let context = {};
 
   before(cleanup); // to prevent side effects between test suites
-
+  before(async () => {
+    if (START_WITH_ENV_FILE) {
+      context.serverProcess = await startOpenwhydServer({
+        startWithEnv: START_WITH_ENV_FILE,
+      });
+    }
+  });
+  after(() => {
+    if (context.serverProcess?.kill) {
+      context.serverProcess.kill('SIGINT');
+    }
+  });
   beforeEach(async () => {
     post = {
       eId: `/yt/${randomString()}`,

@@ -2,9 +2,24 @@ var assert = require('assert');
 
 var { DUMMY_USER, cleanup } = require('../fixtures.js');
 var api = require('../api-client.js');
+var { START_WITH_ENV_FILE, DEV } = process.env;
+const { startOpenwhydServer } = require('../approval-tests-helpers');
 
 describe(`post api`, function () {
   before(cleanup); // to prevent side effects between test suites (there are side effects between tests in this file...)
+  let context = {};
+  before(async () => {
+    if (START_WITH_ENV_FILE) {
+      context.serverProcess = await startOpenwhydServer({
+        startWithEnv: START_WITH_ENV_FILE,
+      });
+    }
+  });
+  after(() => {
+    if (context.serverProcess?.kill) {
+      context.serverProcess.kill('SIGINT');
+    }
+  });
 
   var pId, uId;
   const post = {

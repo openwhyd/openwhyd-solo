@@ -57,7 +57,7 @@ exports.actions = {
 
   deleteComment: commentModel.delete,
 
-  insert: function (httpRequestParams, callback) {
+  insert: async function (httpRequestParams, callback) {
     var postRequest = {
       uId: httpRequestParams.uId,
       uNm: httpRequestParams.uNm,
@@ -104,17 +104,17 @@ exports.actions = {
     // Muter post avec la notion de playlist provenant des params
     // Clean code => Pure function
     const playlistRequest = extractPlaylistRequestFrom(httpRequestParams);
-    
-    if (playlistRequest.id == 'create') {
-      userModel.createPlaylist(httpRequestParams.uId, playlistRequest.name, function (playlist) {
-        if (playlist) {
-          postRequest.pl = playlist
-        }
-        actualInsert();
-      });
+
+    if (needToCreatePlaylist(playlistRequest)) {
+      const playlist = await new Promise((resolve, reject) =>
+        userModel.createPlaylist(httpRequestParams.uId, playlistRequest.name, resolve));
+      if (playlist) {
+        postRequest.pl = playlist
+      }
+      actualInsert();
       return; // avoid inserting twice
     } else {
-      postRequest.pl = {id: parseInt(playlistRequest.id), name: playlistRequest.name}
+      postRequest.pl = { id: parseInt(playlistRequest.id), name: playlistRequest.name }
       if (isNaN(postRequest.pl.id)) delete postRequest.pl; //q.pl = null;
     }
 
@@ -242,6 +242,10 @@ exports.controller = function (request, getParams, response) {
 
   exports.handleRequest(request, params, response);
 };
+
+function needToCreatePlaylist(playlistRequest) {
+  return playlistRequest.id == 'create';
+}
 
 function extractPlaylistRequestFrom(httpRequestParams) {
   // Attention double responsabilité: parsing et mapping

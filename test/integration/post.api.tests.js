@@ -20,7 +20,7 @@ describe(`post api`, function () {
     };
 
     ({ jar } = await util.promisify(api.loginAs)(ADMIN_USER));
-    /* We are forced to use the ADMIN_USER, since DUMMY_USER is mutated by user.api.tests.js and the db cleanup seems to not work for the users collection.
+    /* FIXME: We are forced to use the ADMIN_USER, since DUMMY_USER is mutated by user.api.tests.js and the db cleanup seems to not work for the users collection.
      * May be initdb_testing.js is not up to date with the current schema?
      */
   });
@@ -60,7 +60,7 @@ describe(`post api`, function () {
 
   // TODO: "should add a track from a blog"
 
-  it('should add a track from bookmarklet', async function () {
+  it('should add a track', async function () {
     const name = randomString();
     const ctx = 'bk';
 
@@ -92,18 +92,99 @@ describe(`post api`, function () {
     assert.equal(postedTrack.pl, undefined);
   });
 
-  // TODO: "should add a track from hot tracks"
+  it('should add a track to an existing playlist', async function () {
+    const postWithPlaylist = {
+      ...post,
+      pl: { id: 'create', name: randomString() },
+    };
 
-  // TODO: "should add a track to an existing playlist"
+    const { body } = await util.promisify(api.addPost)(jar, postWithPlaylist);
+    const pId = body._id;
+    const name = body.name;
+    const ctx = 'bk';
+    const playlist = body.pl;
+    const description = 'this is a description';
 
-  // TODO: should add a track to a new playlist (where ? if this isnot the bookmarklet ?)
+    await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: name,
+            _id: pId,
+            ctx: ctx,
+            pl: { id: playlist.id, name: playlist.name },
+            text: description,
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const res = await new Promise((resolve, reject) =>
+      request.get(
+        `${URL_PREFIX}/c/${pId}?format=json`,
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const { data: postedTrack } = JSON.parse(res.body);
+    assert.equal(postedTrack.name, name);
+    assert.equal(postedTrack.eId, post.eId);
+    assert.equal(postedTrack.ctx, ctx);
+    assert.equal(postedTrack.pl.id, playlist.id);
+    assert.equal(postedTrack.pl.name, playlist.name);
+    assert.equal(postedTrack.text, description);
+    assert.equal(postedTrack.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.uNm, ADMIN_USER.name);
+  });
 
-  it('should add a track into a new playlist from the bookmarklet', async function () {
+  // TODO: should add a track to a new playlist from the bookmarklet
+
+  it('should add a track to a new playlist', async function () {
+    const name = randomString();
+    const ctx = 'bk';
+    const newPlayListName = randomString();
+
+    const res = await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: name,
+            ctx: ctx,
+            pl: { id: 'create', name: newPlayListName },
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+    const postedTrack = JSON.parse(res.body);
+    assert.equal(postedTrack.name, name);
+    assert.equal(postedTrack.eId, post.eId);
+    assert.equal(postedTrack.ctx, ctx);
+    assert.equal(postedTrack.isNew, true);
+    assert.equal(postedTrack.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.uNm, ADMIN_USER.name);
+    assert.ok(postedTrack._id);
+    assert.ok(postedTrack.pl.id);
+    assert.equal(postedTrack.pl.name, newPlayListName);
+  });
+
+  it('should re-add a track into a new playlist', async function () {
     const { body } = await util.promisify(api.addPost)(jar, post);
     const pId = body._id;
     const name = body.name;
     const ctx = 'bk';
     const newPlayListName = randomString();
+    const description = 'this is a description';
 
     await new Promise((resolve, reject) =>
       request.post(
@@ -116,6 +197,7 @@ describe(`post api`, function () {
             _id: pId,
             ctx: ctx,
             pl: { id: 'create', name: newPlayListName },
+            text: description,
           },
           url: `${URL_PREFIX}/api/post`,
         },
@@ -135,17 +217,16 @@ describe(`post api`, function () {
     assert.equal(postedTrack.eId, post.eId);
     assert.equal(postedTrack.ctx, ctx);
     assert.equal(postedTrack.pl.name, newPlayListName);
+    assert.equal(postedTrack.text, description);
     assert.equal(postedTrack.uId, ADMIN_USER.id);
     assert.equal(postedTrack.uNm, ADMIN_USER.name);
   });
 
-  // TODO: "should warn if about to add a track that I already posted in the past"
+  // TODO: "should warn if about to add a track that I already posted in the past" Note : wasn't able to reproduce this.
 
   // TODO: fix consistency in naming of tests
 
-  // TODO: "should ask to login if trying to add track without session"
-
-  it('should re-add a track to a new playlist from the stream', async function () {
+  it('should re-add a track to a new playlist from the stream or from the Tracks in the user profile', async function () {
     const { body } = await util.promisify(api.addPost)(jar, post);
     const pId = body._id;
     const name = body.name;
@@ -189,10 +270,102 @@ describe(`post api`, function () {
     assert.equal(postedTrack.repost.uNm, ADMIN_USER.name);
   });
 
-  // TODO: "should re-add a track into an existing playlist"
+  it('should re-add a track into an existing playlist', async function () {
+    const postWithPlaylist = {
+      ...post,
+      pl: { id: 'create', name: randomString() },
+    };
 
-  // TODO: "should allow re-adding a track into another playlist"
+    const { body } = await util.promisify(api.addPost)(jar, postWithPlaylist);
+    const pId = body._id;
+    const name = body.name;
+    const playlist = body.pl;
 
-  // TODO: update post
-  // TODO: delete post
+    const res = await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: name,
+            pId: pId,
+            pl: { id: playlist.id, name: playlist.name },
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+
+    const postedTrack = JSON.parse(res.body);
+
+    assert.equal(postedTrack.name, name);
+    assert.equal(postedTrack.eId, post.eId);
+    assert.notEqual(postedTrack.pl.id, undefined);
+    assert.equal(postedTrack.pl.id, playlist.id);
+    assert.equal(postedTrack.pl.name, playlist.name);
+    assert.equal(postedTrack.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.uNm, ADMIN_USER.name);
+    assert.deepEqual(postedTrack.lov, []);
+    assert.equal(postedTrack.text, '');
+    assert.equal(postedTrack.nbP, 0);
+    assert.equal(postedTrack.nbR, 0);
+
+    assert.notEqual(postedTrack._id, pId);
+
+    assert.equal(postedTrack.repost.pId, pId);
+    assert.equal(postedTrack.repost.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.repost.uNm, ADMIN_USER.name);
+  });
+
+  it('should allow re-adding a track into another playlist', async function () {
+    const postWithPlaylist = {
+      ...post,
+      pl: { id: 'create', name: randomString() },
+    };
+
+    const { body } = await util.promisify(api.addPost)(jar, postWithPlaylist);
+    const pId = body._id;
+    const name = body.name;
+    const newPlaylistName = randomString();
+
+    const res = await new Promise((resolve, reject) =>
+      request.post(
+        {
+          jar,
+          form: {
+            action: 'insert',
+            eId: post.eId,
+            name: name,
+            pId: pId,
+            pl: { id: 'create', name: newPlaylistName },
+          },
+          url: `${URL_PREFIX}/api/post`,
+        },
+        (error, response, body) =>
+          error ? reject(error) : resolve({ response, body })
+      )
+    );
+
+    const postedTrack = JSON.parse(res.body);
+
+    assert.equal(postedTrack.name, name);
+    assert.equal(postedTrack.eId, post.eId);
+    assert.ok(postedTrack.pl.id);
+    assert.equal(postedTrack.pl.name, newPlaylistName);
+    assert.equal(postedTrack.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.uNm, ADMIN_USER.name);
+    assert.deepEqual(postedTrack.lov, []);
+    assert.equal(postedTrack.text, '');
+    assert.equal(postedTrack.nbP, 0);
+    assert.equal(postedTrack.nbR, 0);
+
+    assert.notEqual(postedTrack._id, pId);
+
+    assert.equal(postedTrack.repost.pId, pId);
+    assert.equal(postedTrack.repost.uId, ADMIN_USER.id);
+    assert.equal(postedTrack.repost.uNm, ADMIN_USER.name);
+  });
 });

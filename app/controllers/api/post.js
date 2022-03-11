@@ -239,7 +239,7 @@ exports.handleRequest = function (request, reqParams, response) {
   else response.badRequest();
 };
 
-exports.controller = function (request, getParams, response) {
+exports.controller = function (request, getParams, response, domain) {
   //request.logToConsole("api.post", getParams);
   var params = snip.translateFields(getParams || {}, sequencedParameters);
 

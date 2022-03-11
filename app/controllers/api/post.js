@@ -111,9 +111,8 @@ exports.actions = {
       if (playlist) {
         postRequest.pl = playlist
       }
-    } else {
+    } else if (hasAValidPlaylistId(postRequest)) {
       postRequest.pl = { id: parseInt(playlistRequest.id), name: playlistRequest.name }
-      if (isNaN(postRequest.pl.id)) delete postRequest.pl; //q.pl = null;
     }
 
     actualInsert();
@@ -240,6 +239,10 @@ exports.controller = function (request, getParams, response) {
 
   exports.handleRequest(request, params, response);
 };
+
+function hasAValidPlaylistId(postRequest) {
+  return !isNaN(postRequest.pl.id);
+}
 
 function needToCreatePlaylist(playlistRequest) {
   return playlistRequest.id == 'create';

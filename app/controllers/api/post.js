@@ -117,15 +117,11 @@ exports.actions = {
           resolve
         )
       );
-    } else {
+    } else if (hasAValidPlaylistId(playlistRequest.id)) {
       postRequest.pl = {
         id: parseInt(playlistRequest.id),
         name: playlistRequest.name,
       };
-    }
-
-    if (!hasAValidPlaylistId(postRequest.pl?.id)) {
-      delete postRequest.pl;
     }
 
     actualInsert();
@@ -254,7 +250,7 @@ exports.controller = function (request, getParams, response) {
 };
 
 function hasAValidPlaylistId(id) {
-  return !isNaN(id);
+  return id !== '' && !isNaN(id);
 }
 
 function needToCreatePlaylist(playlistRequest) {

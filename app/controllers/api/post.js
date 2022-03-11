@@ -62,7 +62,6 @@ exports.actions = {
       uId: httpRequestParams.uId,
       uNm: httpRequestParams.uNm,
       text: httpRequestParams.text || '',
-      pl: undefined, // to be parsed/populated before calling actualInsert()
       // fields that will be ignored by rePost():
       name: httpRequestParams.name,
       eId: httpRequestParams.eId,
@@ -118,11 +117,15 @@ exports.actions = {
           resolve
         )
       );
-    } else if (hasAValidPlaylistId(playlistRequest.id)) {
+    } else {
       postRequest.pl = {
         id: parseInt(playlistRequest.id),
         name: playlistRequest.name,
       };
+    }
+
+    if (!hasAValidPlaylistId(postRequest.pl?.id)) {
+      delete postRequest.pl;
     }
 
     actualInsert();

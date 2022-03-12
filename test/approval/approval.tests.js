@@ -69,8 +69,8 @@ async function setupTestEnv() {
 }
 
 function teardownTestEnv(context) {
-  if (context.serverProcess?.kill && !DONT_KILL) {
-    context.serverProcess.kill('SIGINT');
+  if (context.serverProcess && !DONT_KILL) {
+    process.kill(-context.serverProcess.pid); // kill the process and its subprocesses, cf https://man7.org/linux/man-pages/man2/kill.2.html
   }
 }
 

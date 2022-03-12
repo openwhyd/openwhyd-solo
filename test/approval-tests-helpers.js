@@ -136,6 +136,7 @@ async function startOpenwhydServerWith(env) {
     process.env.COVERAGE === 'true'
       ? childProcess.exec('npm run start:coverage:no-clean', {
           env: { ...env, PATH: process.env.PATH },
+          detached: true, // necessary to kill subprocesses too, using kill(-pid), cf https://stackoverflow.com/a/56016815/592254
         })
       : childProcess.fork('./app.js', [], {
           env,

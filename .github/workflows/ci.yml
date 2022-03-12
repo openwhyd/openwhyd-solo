@@ -172,24 +172,11 @@ jobs:
         env:
           CI: true
         run: npm install --prefer-offline --no-audit
-      - name: Initialize database
+      - run: npm run test:post:coverage
         env:
           CI: true
           MONGODB_HOST: localhost
           MONGODB_PORT: 27117
-        run: npm run test-reset
-        # run: npm run test:post:coverage
-      - run: COVERAGE=true npm run test:approval -- --serial --timeout 10000
-        env:
-          CI: true
-      - run: COVERAGE=true npm run test:integration:post -- --serial --timeout 10000
-        env:
-          CI: true
-          MONGODB_HOST: localhost
-          MONGODB_PORT: 27117
-      - run: npx nyc report --reporter=lcov && npx nyc report | grep post
-        env:
-          CI: true
 
       - uses: codacy/codacy-coverage-reporter-action@master
         with:

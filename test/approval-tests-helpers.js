@@ -138,6 +138,7 @@ const startOpenwhydServerWith = async (env) =>
       process.env.COVERAGE === 'true'
         ? childProcess.exec('npm run start:coverage:no-clean', {
             env: { ...env, PATH: process.env.PATH },
+            detached: true,
           })
         : childProcess.fork('./app.js', [], {
             env,
@@ -148,11 +149,19 @@ const startOpenwhydServerWith = async (env) =>
       new Promise((resolve) => {
         console.warn('✋ childprocess exit requested by tests', {
           killed: serverProcess.killed,
+          pid: serverProcess.pid,
         });
         if (serverProcess.killed) return resolve();
         serverProcess.on('close', resolve);
         if (!serverProcess.kill('SIGINT')) {
           console.warn('🧟‍♀️ failed to kill childprocess!');
+        }
+        if (serverProcess.pid) {
+          try {
+            process.kill(-serverProcess.pid, 'SIGINT');
+          } catch (err) {
+            console.warn('failed to kill by pid:', err.message);
+          }
         }
       });
     serverProcess.on('error', (err) => {

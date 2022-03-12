@@ -2,7 +2,7 @@ var assert = require('assert');
 
 var { DUMMY_USER, cleanup } = require('../fixtures.js');
 var api = require('../api-client.js');
-var { START_WITH_ENV_FILE, DEV } = process.env;
+var { START_WITH_ENV_FILE } = process.env;
 const { startOpenwhydServer } = require('../approval-tests-helpers');
 
 describe(`post api`, function () {
@@ -15,10 +15,8 @@ describe(`post api`, function () {
       });
     }
   });
-  after(() => {
-    if (context.serverProcess?.kill) {
-      context.serverProcess.kill('SIGINT');
-    }
+  after(async () => {
+    await context.serverProcess?.exit();
   });
 
   var pId, uId;

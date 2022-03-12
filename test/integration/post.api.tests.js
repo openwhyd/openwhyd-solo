@@ -4,7 +4,7 @@ const request = require('request');
 
 var { ADMIN_USER, cleanup, URL_PREFIX } = require('../fixtures.js');
 var api = require('../api-client.js');
-var { START_WITH_ENV_FILE, DEV } = process.env;
+var { START_WITH_ENV_FILE } = process.env;
 const { startOpenwhydServer } = require('../approval-tests-helpers');
 const randomString = () => Math.random().toString(36).substring(2, 9);
 
@@ -21,10 +21,8 @@ describe(`post api`, function () {
       });
     }
   });
-  after(() => {
-    if (context.serverProcess?.kill) {
-      context.serverProcess.kill('SIGINT');
-    }
+  after(async () => {
+    await context.serverProcess?.exit();
   });
   beforeEach(async () => {
     post = {

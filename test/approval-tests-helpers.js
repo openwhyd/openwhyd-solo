@@ -3,7 +3,6 @@ const { promisify, ...util } = require('util');
 const mongodb = require('mongodb');
 const request = require('request');
 const childProcess = require('child_process');
-const waitOn = require('wait-on');
 
 const makeJSONScrubber = (scrubbers) => (obj) =>
   JSON.parse(
@@ -131,22 +130,42 @@ const errPrinter = ((blocklist) => {
   'please install graphicsmagick',
 ]);
 
-async function startOpenwhydServerWith(env) {
-  const serverProcess =
-    process.env.COVERAGE === 'true'
-      ? childProcess.exec('npm run start:coverage:no-clean', {
-          env: { ...env, PATH: process.env.PATH },
-        })
-      : childProcess.fork('./app.js', [], {
-          env,
-          silent: true, // necessary to initialize serverProcess.stderr
-        });
-  serverProcess.stderr.on('data', errPrinter);
-  if (process.env.DEBUG) serverProcess.stdout.on('data', errPrinter);
-  serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
-  await waitOn({ resources: [serverProcess.URL] });
-  return serverProcess;
-}
+const startOpenwhydServerWith = async (env) =>
+  new Promise((resolve, reject) => {
+    const serverProcess =
+      process.env.COVERAGE === 'true'
+        ? childProcess.spawn('npm', ['run', 'start:coverage:no-clean'], {
+            env: { ...env, PATH: process.env.PATH },
+            shell: true,
+            detached: true, // when running on CI, we need this to kill the process group using `process.kill(-serverProcess.pid)`
+          })
+        : childProcess.fork('./app.js', [], {
+            env,
+            silent: true, // necessary to initialize serverProcess.stderr
+          });
+    serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
+    serverProcess.exit = () =>
+      new Promise((resolve) => {
+        if (serverProcess.killed) return resolve();
+        serverProcess.on('close', resolve);
+        if (!(serverProcess.kill(/*'SIGTERM'*/))) {
+          console.warn('🧟‍♀️ failed to kill childprocess!');
+        }
+        if (serverProcess.pid) {
+          try {
+            process.kill(-serverProcess.pid, 'SIGINT');
+          } catch (err) {
+            console.warn('failed to kill by pid:', err.message);
+          }
+        }
+      });
+    serverProcess.on('error', reject);
+    serverProcess.stderr.on('data', errPrinter);
+    serverProcess.stdout.on('data', (str) => {
+      if (process.env.DEBUG) errPrinter(str);
+      if (str.includes('Server running')) resolve(serverProcess);
+    });
+  });
 
 /* refresh openwhyd's in-memory cache of users, to allow this user to login */
 async function refreshOpenwhydCache(urlPrefix) {

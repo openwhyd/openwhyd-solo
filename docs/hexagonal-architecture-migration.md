@@ -28,3 +28,9 @@ To start the migration exercise, checkout the following git tag:
 ```bash
 git checkout migration-start
 ```
+
+## JSDoc type checks for CI
+
+```bash
+npx tsc --noEmit --allowJs app/lib/my-http-wrapper/http/Application.js
+```

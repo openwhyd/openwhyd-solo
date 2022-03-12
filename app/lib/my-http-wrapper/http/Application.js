@@ -1,3 +1,5 @@
+// @ts-check
+
 const fs = require('fs');
 const http = require('http');
 const express = require('express');
@@ -8,8 +10,10 @@ const LOG_THRESHOLD = process.env.LOG_REQ_THRESHOLD_MS || 500;
 
 // From Response.js
 
+// @ts-ignore
 http.ServerResponse.prototype.legacyRender = function (
   view,
+  // @ts-ignore
   data,
   headers = {},
   statusCode
@@ -18,6 +22,7 @@ http.ServerResponse.prototype.legacyRender = function (
   if (!headers['content-type']) {
     headers['content-type'] = isString ? 'text/plain' : 'application/json';
   }
+  // @ts-ignore
   this.set(headers)
     .status(statusCode || 200)
     .send(isString ? view : JSON.stringify(view));
@@ -25,6 +30,7 @@ http.ServerResponse.prototype.legacyRender = function (
 
 // Middlewares
 
+// @ts-ignore
 function noCache(req, res, next) {
   res.set(
     'Cache-Control',
@@ -34,9 +40,12 @@ function noCache(req, res, next) {
 }
 
 const makeBodyParser = (uploadSettings) =>
+  // @ts-ignore
   function bodyParser(req, res, callback) {
     var form = new formidable.IncomingForm();
+    // @ts-ignore
     form.uploadDir = uploadSettings.uploadDir;
+    // @ts-ignore
     form.keepExtensions = uploadSettings.keepExtensions;
     form.parse(req, function (err, postParams, files) {
       if (err) console.error('formidable parsing error:', err);
@@ -61,12 +70,14 @@ const makeStatsUpdater = () =>
     // log whenever a request is slow to respond
     res.on('finish', () => {
       const reqId = `${startDate.toISOString()} ${req.method} ${req.path}`;
+      // @ts-ignore
       const duration = Date.now() - startDate;
       console.log(`◀ ${reqId} responds ${res.statusCode} after ${duration} ms`);
       appendSlowQueryToAccessLog({
         startDate,
         req,
         userId,
+        // @ts-ignore
         userAgent,
       });
     });
@@ -74,6 +85,7 @@ const makeStatsUpdater = () =>
     next();
   };
 
+// @ts-ignore
 function defaultErrorHandler(req, reqParams, res, statusCode) {
   res.sendStatus(statusCode);
 }
@@ -96,6 +108,14 @@ exports.Application = class Application {
     this._urlPrefix = options.urlPrefix;
     this._expressApp = null; // will be lazy-loaded by getExpressApp()
     this._uploadSettings = options.uploadSettings;
+    /**
+     * @type {import('../../../domain/Domain').Domain}
+     */
+    this._domain = {
+      name() {
+        return 'coucou !';
+      },
+    };
   }
 
   getExpressApp() {
@@ -116,7 +136,12 @@ exports.Application = class Application {
     app.use(makeBodyParser(this._uploadSettings)); // parse uploads and arrays from query params
     this._sessionMiddleware && app.use(this._sessionMiddleware);
     app.use(makeStatsUpdater());
-    attachLegacyRoutesFromFile(app, this._appDir, this._routeFile);
+    attachLegacyRoutesFromFile(
+      app,
+      this._appDir,
+      this._routeFile,
+      this._domain
+    );
     app.use(makeNotFound(this._errorHandler));
     return (this._expressApp = app);
   }
@@ -170,21 +195,31 @@ function loadControllerFile({ name, appDir }) {
 }
 
 // attaches a legacy controller to an Express app
-function attachLegacyRoute({ expressApp, method, path, controllerFile }) {
+function attachLegacyRoute({
+  expressApp,
+  method,
+  path,
+  controllerFile,
+  domain,
+}) {
   expressApp[method](path, function endpointHandler(req, res) {
     req.mergedParams = { ...req.params, ...req.query };
-    return controllerFile.controller(req, req.mergedParams, res);
+
+    return controllerFile.controller(req, req.mergedParams, res, domain);
   });
 }
 
-function attachLegacyRoutesFromFile(expressApp, appDir, routeFile) {
+function attachLegacyRoutesFromFile(expressApp, appDir, routeFile, domain) {
   loadRoutesFromFile(routeFile).forEach(({ pattern, name }) => {
+    // if (name.includes('name'))
+    // @ts-ignore
     const { method, path } = parseExpressRoute({ pattern, name });
     attachLegacyRoute({
       expressApp,
       method,
       path,
       controllerFile: loadControllerFile({ name, appDir }),
+      domain,
     });
   });
 }

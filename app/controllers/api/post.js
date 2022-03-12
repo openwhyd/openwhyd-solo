@@ -1,3 +1,4 @@
+// @ts-check
 /**
  * api endpoint for posts
  * @author adrienjoly, whyd
@@ -239,7 +240,10 @@ exports.handleRequest = function (request, reqParams, response) {
   else response.badRequest();
 };
 
-exports.controller = function (request, getParams, response) {
+/**
+ * @param domain {import('../../domain/Domain').Domain}
+ */
+exports.controller = function (request, getParams, response, domain) {
   //request.logToConsole("api.post", getParams);
   var params = snip.translateFields(getParams || {}, sequencedParameters);
 

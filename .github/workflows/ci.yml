@@ -178,10 +178,17 @@ jobs:
           MONGODB_HOST: localhost
           MONGODB_PORT: 27117
         run: npm run test-reset
-      - name: Run tests on `post` API
+        # run: npm run test:post:coverage
+      - run: DEBUG=true COVERAGE=true npm run test:approval -- --serial --timeout 10000
         env:
           CI: true
-        run: npm run test:post:coverage
+      - run: DEBUG=true COVERAGE=true npm run test:integration:post -- --serial --timeout 10000
+        env:
+          CI: true
+      - run: npx nyc report --reporter=lcov && npx nyc report | grep post
+        env:
+          CI: true
+
       - uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_REPOSITORY_TOKEN_FOR_COVERAGE }}

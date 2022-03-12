@@ -16,9 +16,7 @@ describe(`post api`, function () {
     }
   });
   after(async () => {
-    if (START_WITH_ENV_FILE) {
-      await context.serverProcess.exit();
-    }
+    await context.serverProcess?.exit();
   });
 
   var pId, uId;

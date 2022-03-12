@@ -69,7 +69,7 @@ async function setupTestEnv() {
 }
 
 async function teardownTestEnv(context) {
-  if (START_WITH_ENV_FILE && !DONT_KILL) {
+  if (context.serverProcess && !DONT_KILL) {
     await context.serverProcess.exit();
   }
 }

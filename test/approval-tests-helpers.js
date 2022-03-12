@@ -145,25 +145,17 @@ const startOpenwhydServerWith = async (env) =>
     serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
     serverProcess.exit = () =>
       new Promise((resolve) => {
-        console.warn('✋ childprocess exit requested by tests', {
-          killed: serverProcess.killed,
-          pid: serverProcess.pid,
-        });
         if (serverProcess.killed) return resolve();
         serverProcess.on('close', resolve);
         if (!(serverProcess.kill(/*'SIGTERM'*/))) {
           console.warn('🧟‍♀️ failed to kill childprocess!');
         }
       });
-    serverProcess.on('error', (err) => {
-      console.warn('🎃 childprocess error:', err);
-      reject(err);
-    });
+    serverProcess.on('error', reject);
     serverProcess.stderr.on('data', errPrinter);
     serverProcess.stdout.on('data', (str) => {
       if (process.env.DEBUG) errPrinter(str);
       if (str.includes('Server running')) resolve(serverProcess);
-      // await waitOn({ resources: [serverProcess.URL] }),
     });
   });
 

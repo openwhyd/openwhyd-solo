@@ -179,10 +179,10 @@ jobs:
           MONGODB_PORT: 27117
         run: npm run test-reset
         # run: npm run test:post:coverage
-      - run: DEBUG=true COVERAGE=true npm run test:approval -- --bail --serial --timeout 20000
+      - run: COVERAGE=true npm run test:approval -- --serial --timeout 10000
         env:
           CI: true
-      - run: DEBUG=true COVERAGE=true npm run test:integration:post -- --bail --serial --timeout 20000
+      - run: COVERAGE=true npm run test:integration:post -- --serial --timeout 10000
         env:
           CI: true
           MONGODB_HOST: localhost

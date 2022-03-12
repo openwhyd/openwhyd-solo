@@ -157,6 +157,7 @@ jobs:
         image: docker://mongo:3.4
         ports:
           - 27017:27017
+    steps:
       - uses: actions/checkout@v2
       - uses: browniebroke/read-nvmrc-action@v1 # Read node version from `.nvmrc` file
         id: nvmrc

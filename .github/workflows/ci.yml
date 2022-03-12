@@ -175,7 +175,7 @@ jobs:
       - name: Initialize database
         env:
           CI: true
-          MONGODB_HOST: mongodb
+          MONGODB_HOST: localhost
           MONGODB_PORT: 27117
         run: npm run test-reset
       - name: Run tests on `post` API

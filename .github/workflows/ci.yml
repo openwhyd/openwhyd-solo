@@ -177,7 +177,6 @@ jobs:
           CI: true
           MONGODB_HOST: localhost
           MONGODB_PORT: 27117
-
       - uses: codacy/codacy-coverage-reporter-action@master
         with:
           project-token: ${{ secrets.CODACY_REPOSITORY_TOKEN_FOR_COVERAGE }}

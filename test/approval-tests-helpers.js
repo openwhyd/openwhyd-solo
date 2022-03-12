@@ -150,6 +150,13 @@ const startOpenwhydServerWith = async (env) =>
         if (!(serverProcess.kill(/*'SIGTERM'*/))) {
           console.warn('🧟‍♀️ failed to kill childprocess!');
         }
+        if (serverProcess.pid) {
+          try {
+            process.kill(-serverProcess.pid, 'SIGINT');
+          } catch (err) {
+            console.warn('failed to kill by pid:', err.message);
+          }
+        }
       });
     serverProcess.on('error', reject);
     serverProcess.stderr.on('data', errPrinter);

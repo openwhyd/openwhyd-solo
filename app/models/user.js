@@ -1,3 +1,4 @@
+//@ts-check
 /**
  * user model
  * fetch user information from mongodb
@@ -194,8 +195,8 @@ function processUserPref(user) {
       user.pref[i] === undefined || user.pref[i] === null
         ? defaultPref[i] // default is better than null/undefined value
         : typeof defaultPref[i] == 'boolean'
-        ? !!user.pref[i]
-        : user.pref[i]; // type existing values accordingly to defaults
+          ? !!user.pref[i]
+          : user.pref[i]; // type existing values accordingly to defaults
   return user;
 }
 
@@ -426,6 +427,9 @@ exports.hasPlaylistNameByUid = function (uId, name, cb) {
   });
 };
 
+/**
+ * @type {import('../domain/spi/UserRepository').CreatePlaylist})}
+ */
 exports.createPlaylist = function (uId, name, handler) {
   fetch({ _id: uId }, function (err, user) {
     user.pl = user.pl || [];

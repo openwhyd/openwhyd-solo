@@ -7,7 +7,6 @@
 var snip = require('../../snip.js');
 var mongodb = require('../../models/mongodb.js');
 var postModel = require('../../models/post.js');
-var userModel = require('../../models/user.js');
 var commentModel = require('../../models/comment.js');
 var lastFm = require('./lastFm.js').lastFm;
 
@@ -59,7 +58,7 @@ exports.actions = {
   deleteComment: commentModel.delete,
 
   /**
-   * @param features {import('../../domain/Features').Features}
+   * @param features {import('../../domain/api/Features').Features}
    */
   insert: async function (httpRequestParams, callback, _, features) {
     const { createPlaylist } = features;
@@ -209,7 +208,7 @@ exports.actions = {
 };
 
 /**
- * @param features {import('../../domain/Features').Features}
+ * @param features {import('../../domain/api/Features').Features}
  */
 exports.handleRequest = function (request, reqParams, response, features) {
   request.logToConsole('api.post.handleRequest', reqParams);
@@ -249,7 +248,7 @@ exports.handleRequest = function (request, reqParams, response, features) {
 };
 
 /**
- * @param features {import('../../domain/Features').Features}
+ * @param features {import('../../domain/api/Features').Features}
  */
 exports.controller = function (request, getParams, response, features) {
   //request.logToConsole("api.post", getParams);

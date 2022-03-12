@@ -147,6 +147,43 @@ jobs:
           CI: true
         run: npm run test:integration
 
+  refactor-coverage:
+    name: Send test coverage of the `post` API to Codacy
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    timeout-minutes: 5
+    runs-on: ubuntu-20.04
+    services:
+      mongodb:
+        image: docker://mongo:3.4
+        ports:
+          - 27017:27017
+      - uses: actions/checkout@v2
+      - uses: browniebroke/read-nvmrc-action@v1 # Read node version from `.nvmrc` file
+        id: nvmrc
+      - uses: actions/setup-node@v2.2.0
+        with:
+          node-version: '${{ steps.nvmrc.outputs.node_version }}'
+          cache: 'npm'
+      - uses: c-py/action-dotenv-to-setenv@v2
+        with:
+          env-file: env-vars-testing.conf
+      - name: npm install
+        env:
+          CI: true
+        run: npm install --prefer-offline --no-audit
+      - name: Initialize database
+        env:
+          CI: true
+        run: npm run test-reset
+      - name: API tests
+        env:
+          CI: true
+        run: npm run test:post:coverage
+      - uses: codacy/codacy-coverage-reporter-action@master
+        with:
+          project-token: ${{ secrets.CODACY_REPOSITORY_TOKEN_FOR_COVERAGE }}
+          coverage-reports: coverage/lcov.info
+
   cypress-tests:
     name: Cypress E2E tests
     if: "!contains(github.event.head_commit.message, '[skip ci]')"

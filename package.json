@@ -56,6 +56,7 @@
     "formidable": "^1.2.2",
     "hogan.js": "3.0.2",
     "iconv": ">=3.0.0",
+    "kill-port": "^1.6.1",
     "mongodb": "3.6.3",
     "playemjs": "1.2.2",
     "q-set": "^2.0.8",

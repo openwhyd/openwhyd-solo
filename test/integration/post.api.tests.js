@@ -1,6 +1,7 @@
 var assert = require('assert');
 const util = require('util');
 const request = require('request');
+const kill = require('kill-port');
 
 var { ADMIN_USER, cleanup, URL_PREFIX } = require('../fixtures.js');
 var api = require('../api-client.js');
@@ -23,7 +24,7 @@ describe(`post api`, function () {
   });
   after(() => {
     if (context.serverProcess?.kill) {
-      context.serverProcess.kill('SIGINT');
+      kill(process.env.WHYD_PORT, 'tcp');
     }
   });
   beforeEach(async () => {

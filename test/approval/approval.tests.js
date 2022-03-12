@@ -4,6 +4,7 @@ const approvals = require('approvals').mocha();
 const util = require('util');
 const request = require('request');
 const { URL_PREFIX } = require('../fixtures.js');
+const kill = require('kill-port');
 
 const {
   START_WITH_ENV_FILE,
@@ -70,7 +71,7 @@ async function setupTestEnv() {
 
 function teardownTestEnv(context) {
   if (context.serverProcess?.kill && !DONT_KILL) {
-    context.serverProcess.kill('SIGINT');
+    kill(process.env.WHYD_PORT, 'tcp');
   }
 }
 

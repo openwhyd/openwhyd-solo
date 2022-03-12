@@ -1,5 +1,5 @@
 var assert = require('assert');
-
+const kill = require('kill-port');
 var { DUMMY_USER, cleanup } = require('../fixtures.js');
 var api = require('../api-client.js');
 var { START_WITH_ENV_FILE, DEV } = process.env;
@@ -17,7 +17,7 @@ describe(`post api`, function () {
   });
   after(() => {
     if (context.serverProcess?.kill) {
-      context.serverProcess.kill('SIGINT');
+      kill(process.env.WHYD_PORT, 'tcp');
     }
   });
 

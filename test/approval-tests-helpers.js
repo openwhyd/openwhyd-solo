@@ -137,6 +137,7 @@ const startOpenwhydServerWith = async (env) =>
         ? childProcess.spawn('npm', ['run', 'start:coverage:no-clean'], {
             env: { ...env, PATH: process.env.PATH },
             shell: true,
+            detached: true, // when running on CI, we need this to kill the process group using `process.kill(-serverProcess.pid)`
           })
         : childProcess.fork('./app.js', [], {
             env,

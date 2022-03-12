@@ -143,6 +143,7 @@ const startOpenwhydServerWith = async (env) =>
           childProcess.spawn('npm', ['run', 'start:coverage:no-clean'], {
             shell: true,
             env: { ...env, PATH: process.env.PATH },
+            detached: true,
             // stdio: 'inherit',
           })
         : childProcess.fork('./app.js', [], {
@@ -158,7 +159,8 @@ const startOpenwhydServerWith = async (env) =>
         });
         if (serverProcess.killed) return resolve();
         serverProcess.on('close', resolve);
-        if (!serverProcess.kill('SIGINT')) {
+        if (!(serverProcess.kill(/*'SIGINT'*/))) {
+          // by default: SIGTERM
           console.warn('🧟‍♀️ failed to kill childprocess!');
         }
         if (serverProcess.pid) {

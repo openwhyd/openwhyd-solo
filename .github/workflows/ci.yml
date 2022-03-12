@@ -185,6 +185,8 @@ jobs:
       - run: DEBUG=true COVERAGE=true npm run test:integration:post -- --bail --serial --timeout 20000
         env:
           CI: true
+          MONGODB_HOST: localhost
+          MONGODB_PORT: 27117
       - run: npx nyc report --reporter=lcov && npx nyc report | grep post
         env:
           CI: true

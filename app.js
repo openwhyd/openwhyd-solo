@@ -125,14 +125,9 @@ function start() {
     },
   };
   require('./app/models/logging.js'); // init logging methods (IncomingMessage extensions)
-  const url = params.urlPrefix || `http://127.0.0.1:${params.port}/`;
-  console.log(`[app] Starting HTTP server at ${url}...`);
   const appServer = new myHttp.Application(serverOptions);
-  appServer.start((err) => {
-    if (err) {
-      console.warn(`[app] start error: ${err.message}`);
-      closeGracefully();
-    }
+  appServer.start(() => {
+    const url = params.urlPrefix || `http://127.0.0.1:${params.port}/`;
     console.log(`[app] Server running at ${url}`);
   });
 

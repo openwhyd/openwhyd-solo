@@ -427,7 +427,6 @@ exports.hasPlaylistNameByUid = function (uId, name, cb) {
 };
 
 exports.createPlaylist = function (uId, name, handler) {
-  // console.log('user.createPlaylist', uId, name);
   fetch({ _id: uId }, function (err, user) {
     user.pl = user.pl || [];
     var pl = {
@@ -477,26 +476,26 @@ exports.renamePlaylist = function (uId, plId, plName, handler) {
 };
 /*
 exports.setPlaylistImg = function(uId, plId, img, cb) {
-	console.log("user.setPlaylistImg", uId, plId, img);
-	fetch({_id:uId}, function(err, user) {
-		var found = true;
-		user.pl = user.pl || [];
-		for (let i in user.pl)
-			if (""+user.pl[i].id == ""+plId) {
-				if (img || img.indexOf("blank") == -1)
-					user.pl[i].img = img;
-				else
-					delete user.pl[i].img;
-				found = user.pl[i];
-				break;
-			}
-		if (found)
-			exports.save(user, function() {
-				cb(found);
-			});
-		else if (cb)
-			cb();
-	});
+  console.log("user.setPlaylistImg", uId, plId, img);
+  fetch({_id:uId}, function(err, user) {
+    var found = true;
+    user.pl = user.pl || [];
+    for (let i in user.pl)
+      if (""+user.pl[i].id == ""+plId) {
+        if (img || img.indexOf("blank") == -1)
+          user.pl[i].img = img;
+        else
+          delete user.pl[i].img;
+        found = user.pl[i];
+        break;
+      }
+    if (found)
+      exports.save(user, function() {
+        cb(found);
+      });
+    else if (cb)
+      cb();
+  });
 }
 */
 exports.deletePlaylist = function (uId, plId, handler) {
@@ -743,28 +742,28 @@ exports.fetchPlaylists = function (user, params, cb) {
     }
   );
   /*
-	function handlePlaylist(playlist, countNext) {
-		var plUid = playlist.collabId ? null : uId;
-		var plId = playlist.collabId || playlist.id;
-		postModel.countPlaylistPosts(plUid, plId, function(count) {
-			playlist.nbTracks = count;
-			// if (count && count > 0)
-			// 	postModel.fetchPlaylistPosts(plUid, plId, {limit:2}, function(posts) {
-			// 		playlist.lastPosts = posts;
-			// 		countNext();
-			// 	});
-			// else
-				countNext();
-		});
-	}
-	// collabModel.fetchPlaylistsByUid(uId, function(playlists){
-	// 	for(var i in playlists)
-	// 		pl.push({
-	// 			collabId: playlists[i]._id,
-	// 			name: playlists[i].name,
-	// 			url: "/playlist/" + playlists[i]._id
-	// 		});
-		snip.forEachArrayItem((pl || []).reverse(), handlePlaylist, cb);
-	//});
-	*/
+  function handlePlaylist(playlist, countNext) {
+    var plUid = playlist.collabId ? null : uId;
+    var plId = playlist.collabId || playlist.id;
+    postModel.countPlaylistPosts(plUid, plId, function(count) {
+      playlist.nbTracks = count;
+      // if (count && count > 0)
+      // 	postModel.fetchPlaylistPosts(plUid, plId, {limit:2}, function(posts) {
+      // 		playlist.lastPosts = posts;
+      // 		countNext();
+      // 	});
+      // else
+        countNext();
+    });
+  }
+  // collabModel.fetchPlaylistsByUid(uId, function(playlists){
+  // 	for(var i in playlists)
+  // 		pl.push({
+  // 			collabId: playlists[i]._id,
+  // 			name: playlists[i].name,
+  // 			url: "/playlist/" + playlists[i]._id
+  // 		});
+    snip.forEachArrayItem((pl || []).reverse(), handlePlaylist, cb);
+  //});
+  */
 };

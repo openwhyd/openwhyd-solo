@@ -5,7 +5,6 @@ const http = require('http');
 const express = require('express');
 const formidable = require('formidable');
 const qset = require('q-set'); // instead of body-parser, for form fields with brackets
-
 const LOG_THRESHOLD = process.env.LOG_REQ_THRESHOLD_MS || 500;
 
 // From Response.js
@@ -108,13 +107,14 @@ exports.Application = class Application {
     this._urlPrefix = options.urlPrefix;
     this._expressApp = null; // will be lazy-loaded by getExpressApp()
     this._uploadSettings = options.uploadSettings;
+
+    var userRepository = require('../../../models/user.js');
+
     /**
-     * @type {import('../../../domain/Domain').Domain}
+     * @type {import('../../../domain/Features').Features}
      */
-    this._domain = {
-      name() {
-        return 'coucou !';
-      },
+    this._features = {
+      createPlaylist: userRepository.createPlaylist,
     };
   }
 
@@ -140,7 +140,7 @@ exports.Application = class Application {
       app,
       this._appDir,
       this._routeFile,
-      this._domain
+      this._features
     );
     app.use(makeNotFound(this._errorHandler));
     return (this._expressApp = app);
@@ -200,16 +200,16 @@ function attachLegacyRoute({
   method,
   path,
   controllerFile,
-  domain,
+  features: features,
 }) {
   expressApp[method](path, function endpointHandler(req, res) {
     req.mergedParams = { ...req.params, ...req.query };
 
-    return controllerFile.controller(req, req.mergedParams, res, domain);
+    return controllerFile.controller(req, req.mergedParams, res, features);
   });
 }
 
-function attachLegacyRoutesFromFile(expressApp, appDir, routeFile, domain) {
+function attachLegacyRoutesFromFile(expressApp, appDir, routeFile, features) {
   loadRoutesFromFile(routeFile).forEach(({ pattern, name }) => {
     // if (name.includes('name'))
     // @ts-ignore
@@ -219,7 +219,7 @@ function attachLegacyRoutesFromFile(expressApp, appDir, routeFile, domain) {
       method,
       path,
       controllerFile: loadControllerFile({ name, appDir }),
-      domain,
+      features: features,
     });
   });
 }

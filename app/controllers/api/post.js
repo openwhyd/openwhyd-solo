@@ -58,7 +58,11 @@ exports.actions = {
 
   deleteComment: commentModel.delete,
 
-  insert: async function (httpRequestParams, callback) {
+  /**
+   * @param features {import('../../domain/Features').Features}
+   */
+  insert: async function (httpRequestParams, callback, _, features) {
+    const { createPlaylist } = features;
     var postRequest = {
       uId: httpRequestParams.uId,
       uNm: httpRequestParams.uNm,
@@ -112,11 +116,7 @@ exports.actions = {
 
     if (needToCreatePlaylist(playlistRequest)) {
       postRequest.pl = await new Promise((resolve) =>
-        userModel.createPlaylist(
-          httpRequestParams.uId,
-          playlistRequest.name,
-          resolve
-        )
+        createPlaylist(httpRequestParams.uId, playlistRequest.name, resolve)
       );
     } else if (hasAValidPlaylistId(playlistRequest.id)) {
       postRequest.pl = {
@@ -208,7 +208,10 @@ exports.actions = {
   },
 };
 
-exports.handleRequest = function (request, reqParams, response) {
+/**
+ * @param features {import('../../domain/Features').Features}
+ */
+exports.handleRequest = function (request, reqParams, response, features) {
   request.logToConsole('api.post.handleRequest', reqParams);
 
   function resultHandler(res, args) {
@@ -236,21 +239,26 @@ exports.handleRequest = function (request, reqParams, response) {
   if (!user || !user.id) return response.badRequest();
 
   if (reqParams.action && exports.actions[reqParams.action])
-    exports.actions[reqParams.action](reqParams, resultHandler, request);
+    exports.actions[reqParams.action](
+      reqParams,
+      resultHandler,
+      request,
+      features
+    );
   else response.badRequest();
 };
 
 /**
- * @param domain {import('../../domain/Domain').Domain}
+ * @param features {import('../../domain/Features').Features}
  */
-exports.controller = function (request, getParams, response, domain) {
+exports.controller = function (request, getParams, response, features) {
   //request.logToConsole("api.post", getParams);
   var params = snip.translateFields(getParams || {}, sequencedParameters);
 
   //if (request.method.toLowerCase() === 'post')
   for (let i in request.body) params[i] = request.body[i];
 
-  exports.handleRequest(request, params, response);
+  exports.handleRequest(request, params, response, features);
 };
 
 function hasAValidPlaylistId(id) {

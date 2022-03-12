@@ -28,13 +28,13 @@ exports.actions = {
       uploadCtr.deleteFile(imgPath);
       userModel.fetchPlaylist(p.uId, p.id, function (pl) {
         /*
-				if (pl && pl.img && pl.img.indexOf("blank") == -1) {
-					console.log("deleting previous playlist pic: " + pl.img);
-					uploadCtr.deleteFile(pl.img);
-				}
-				function actualUpdate(newFilename) {
-					userModel.setPlaylistImg(p.uId, p.id, newFilename || p.img, cb);
-				}*/
+        if (pl && pl.img && pl.img.indexOf("blank") == -1) {
+          console.log("deleting previous playlist pic: " + pl.img);
+          uploadCtr.deleteFile(pl.img);
+        }
+        function actualUpdate(newFilename) {
+          userModel.setPlaylistImg(p.uId, p.id, newFilename || p.img, cb);
+        }*/
         if (p.img.indexOf('blank') == -1)
           uploadCtr.renameTo(p.img, imgPath, function () {
             cb(pl);

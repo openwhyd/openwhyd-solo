@@ -3,8 +3,6 @@ const { promisify, ...util } = require('util');
 const mongodb = require('mongodb');
 const request = require('request');
 const childProcess = require('child_process');
-const waitOn = require('wait-on');
-const { resolve } = require('path');
 
 const makeJSONScrubber = (scrubbers) => (obj) =>
   JSON.parse(
@@ -154,16 +152,8 @@ const startOpenwhydServerWith = async (env) =>
         });
         if (serverProcess.killed) return resolve();
         serverProcess.on('close', resolve);
-        if (!(serverProcess.kill(/*'SIGINT'*/))) {
-          // by default: SIGTERM
+        if (!(serverProcess.kill(/*'SIGTERM'*/))) {
           console.warn('🧟‍♀️ failed to kill childprocess!');
-        }
-        if (serverProcess.pid) {
-          try {
-            process.kill(-serverProcess.pid, 'SIGINT');
-          } catch (err) {
-            console.warn('failed to kill by pid:', err.message);
-          }
         }
       });
     serverProcess.on('error', (err) => {

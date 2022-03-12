@@ -15,9 +15,9 @@ describe(`post api`, function () {
       });
     }
   });
-  after(() => {
-    if (context.serverProcess) {
-      process.kill(-context.serverProcess.pid); // kill the process and its subprocesses, cf https://man7.org/linux/man-pages/man2/kill.2.html
+  after(async () => {
+    if (START_WITH_ENV_FILE) {
+      await context.serverProcess.exit();
     }
   });
 

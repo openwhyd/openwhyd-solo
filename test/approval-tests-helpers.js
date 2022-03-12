@@ -136,7 +136,6 @@ async function startOpenwhydServerWith(env) {
     process.env.COVERAGE === 'true'
       ? childProcess.exec('npm run start:coverage:no-clean', {
           env: { ...env, PATH: process.env.PATH },
-          detached: true, // necessary to kill subprocesses too, using kill(-pid), cf https://stackoverflow.com/a/56016815/592254
         })
       : childProcess.fork('./app.js', [], {
           env,
@@ -145,6 +144,12 @@ async function startOpenwhydServerWith(env) {
   serverProcess.stderr.on('data', errPrinter);
   if (process.env.DEBUG) serverProcess.stdout.on('data', errPrinter);
   serverProcess.URL = `http://localhost:${env.WHYD_PORT}`;
+  serverProcess.exit = () =>
+    new Promise((resolve) => {
+      if (serverProcess.killed) return resolve();
+      serverProcess.on('close', resolve);
+      serverProcess.kill('SIGINT');
+    });
   await waitOn({ resources: [serverProcess.URL] });
   return serverProcess;
 }

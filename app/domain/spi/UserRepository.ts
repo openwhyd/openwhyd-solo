@@ -1,11 +1,7 @@
 import { Playlist } from '../Playlist';
 
 export interface UserRepository {
-  createPlaylist(
-    userId: number,
-    playlistName: string,
-    callback: (Playlist: Playlist) => void
-  ): void;
+  createPlaylist: CreatePlaylist;
 }
 
 export type CreatePlaylist = (

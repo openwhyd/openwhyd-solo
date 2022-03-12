@@ -9,6 +9,5 @@ export interface Features {
 
 export type CreatePlaylist = (
   userId: number,
-  playlistName: string,
-  callback: (Playlist: Playlist) => void
-) => void;
+  playlistName: string
+) => Promise<Playlist>;

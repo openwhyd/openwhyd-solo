@@ -114,8 +114,9 @@ exports.actions = {
     const playlistRequest = extractPlaylistRequestFrom(httpRequestParams);
 
     if (needToCreatePlaylist(playlistRequest)) {
-      postRequest.pl = await new Promise((resolve) =>
-        createPlaylist(httpRequestParams.uId, playlistRequest.name, resolve)
+      postRequest.pl = await createPlaylist(
+        httpRequestParams.uId,
+        playlistRequest.name
       );
     } else if (hasAValidPlaylistId(playlistRequest.id)) {
       postRequest.pl = {

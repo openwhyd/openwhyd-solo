@@ -135,9 +135,8 @@ const startOpenwhydServerWith = async (env) =>
     const serverProcess =
       process.env.COVERAGE === 'true'
         ? childProcess.spawn('npm', ['run', 'start:coverage:no-clean'], {
-            shell: true,
             env: { ...env, PATH: process.env.PATH },
-            detached: true,
+            shell: true,
           })
         : childProcess.fork('./app.js', [], {
             env,

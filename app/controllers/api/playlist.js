@@ -1,15 +1,22 @@
+//@ts-check
 /**
  * api endpoint for playlists
  * @author adrienjoly, whyd
  **/
 
+const { features } = require('process');
 var postModel = require('../../models/post.js');
 var userModel = require('../../models/user.js');
 var uploadCtr = require('../uploadedFile.js');
 
 exports.actions = {
-  create: function (p, callback) {
-    userModel.createPlaylist(p.uId, p.name, callback);
+  /**
+   * @param playlistRequest {{uId:string, name:string}}
+   * @param createPlaylist {import ('../../domain/api/Features').CreatePlaylist}
+   */
+  create: function ({ uId: userId, name }, callback, { createPlaylist }) {
+    // const { uId: userId, name } = playlistRequest;
+    createPlaylist(userId, name).then(callback);
     // returns {id, name}
   },
   rename: function (p, callback) {
@@ -45,7 +52,7 @@ exports.actions = {
   },
 };
 
-exports.handlePostRequest = function (request, reqParams, response) {
+exports.handlePostRequest = function (request, reqParams, response, features) {
   request.logToConsole('aoi.playlist.handleRequest', reqParams);
 
   // make sure a registered user is logged, or return an error page
@@ -61,14 +68,18 @@ exports.handlePostRequest = function (request, reqParams, response) {
   reqParams.uId = user.id;
   reqParams.uNm = user.name;
 
-  exports.actions[reqParams.action](reqParams, function (res, args) {
-    console.log(reqParams, '=>', res);
-    response.legacyRender(
-      res,
-      null,
-      args || { 'content-type': 'application/json' }
-    );
-  });
+  exports.actions[reqParams.action](
+    reqParams,
+    function (res, args) {
+      console.log(reqParams, '=>', res);
+      response.legacyRender(
+        res,
+        null,
+        args || { 'content-type': 'application/json' }
+      );
+    },
+    features
+  );
 };
 
 function fetchPlaylist(p, cb) {
@@ -121,12 +132,12 @@ function fetchPlaylist(p, cb) {
   );
 }
 
-exports.controller = function (request, getParams, response) {
+exports.controller = function (request, getParams, response, features) {
   getParams = getParams || {};
   getParams.id = getParams.id || getParams._1;
   request.logToConsole('apiPost.controller', getParams);
   if (request.method.toLowerCase() === 'post')
-    exports.handlePostRequest(request, request.body, response);
+    exports.handlePostRequest(request, request.body, response, features);
   else if (getParams.id)
     fetchPlaylist(getParams, function (playlists) {
       response.renderJSON(playlists);

@@ -5,7 +5,7 @@ export interface UserRepository {
 }
 
 export type CreatePlaylist = (
-  userId: number,
-  playlistName: string,
-  callback: (Playlist: Playlist) => void
+  uId: number,
+  name: string,
+  callback: (playlist: Playlist) => void
 ) => void;

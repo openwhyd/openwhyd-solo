@@ -58,10 +58,9 @@ exports.actions = {
   deleteComment: commentModel.delete,
 
   /**
-   * @param features {import('../../domain/api/Features').Features}
+   * @param createPlaylist {import('../../domain/api/Features').CreatePlaylist}
    */
-  insert: async function (httpRequestParams, callback, _, features) {
-    const { createPlaylist } = features;
+  insert: async function (httpRequestParams, callback, _, { createPlaylist }) {
     var postRequest = {
       uId: httpRequestParams.uId,
       uNm: httpRequestParams.uNm,

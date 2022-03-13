@@ -30,7 +30,7 @@ describe(`playlist api`, function () {
      */
   });
 
-  it.only("should create a playlist", async function () {
+  it('should create a playlist', async function () {
     const playlistName = `playlist-${randomString()}`;
     const res = await new Promise((resolve, reject) =>
       request.post(
@@ -51,5 +51,4 @@ describe(`playlist api`, function () {
     assert.equal(name, playlistName);
     assert.equal(id, 0);
   });
-
 });

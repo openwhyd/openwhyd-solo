@@ -29,8 +29,8 @@ To start the migration exercise, checkout the following git tag:
 git checkout migration-start
 ```
 
-## JSDoc type checks for CI
+## JSDoc type checks
 
 ```bash
-npx tsc --noEmit --allowJs app/lib/my-http-wrapper/http/Application.js
+npx tsc --noEmit --allowJs `find app/ -name "*.js"`
 ```

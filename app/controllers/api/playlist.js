@@ -4,7 +4,6 @@
  * @author adrienjoly, whyd
  **/
 
-const { features } = require('process');
 var postModel = require('../../models/post.js');
 var userModel = require('../../models/user.js');
 var uploadCtr = require('../uploadedFile.js');

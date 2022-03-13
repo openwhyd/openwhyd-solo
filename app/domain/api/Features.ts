@@ -8,6 +8,6 @@ export interface Features {
 }
 
 export type CreatePlaylist = (
-  userId: number,
+  userId: string,
   playlistName: string
 ) => Promise<Playlist>;

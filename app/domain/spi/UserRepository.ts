@@ -1,11 +1,9 @@
-import { Playlist } from '../Playlist';
+import { Playlist, User } from '../user/types';
 
 export interface UserRepository {
-  createPlaylist: CreatePlaylist;
+  getByUserId: GetByUserId;
+  save: Save;
 }
 
-export type CreatePlaylist = (
-  uId: string,
-  name: string,
-  callback: (playlist: Playlist) => void
-) => void;
+export type GetByUserId = (userId: string) => Promise<User>;
+export type Save = (user: User) => Promise<User>;

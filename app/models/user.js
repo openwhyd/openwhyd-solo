@@ -195,8 +195,8 @@ function processUserPref(user) {
       user.pref[i] === undefined || user.pref[i] === null
         ? defaultPref[i] // default is better than null/undefined value
         : typeof defaultPref[i] == 'boolean'
-        ? !!user.pref[i]
-        : user.pref[i]; // type existing values accordingly to defaults
+          ? !!user.pref[i]
+          : user.pref[i]; // type existing values accordingly to defaults
   return user;
 }
 
@@ -424,24 +424,6 @@ exports.hasPlaylistName = function (user, name) {
 exports.hasPlaylistNameByUid = function (uId, name, cb) {
   exports.fetchByUid(uId, function (user) {
     cb(exports.hasPlaylistName(user, name));
-  });
-};
-
-/**
- * @type {import('../domain/spi/UserRepository').CreatePlaylist})}
- */
-exports.createPlaylist = function (uId, name, handler) {
-  fetch({ _id: uId }, function (err, user) {
-    user.pl = user.pl || [];
-    var pl = {
-      id: user.pl.length > 0 ? parseInt(user.pl[user.pl.length - 1].id) + 1 : 0,
-      name: name,
-    };
-    user.pl.push(pl);
-    exports.save(user, function () {
-      // console.log('created playlist:', pl.name, pl.id);
-      handler(pl);
-    });
   });
 };
 

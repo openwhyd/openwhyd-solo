@@ -1,16 +1,45 @@
 //@ts-check
 /**
- * @param {import('./spi/UserRepository').UserRepository} userRepository
- * @returns {import('./api/Features').Features}
+ * @typedef {import('../../app/domain/user/types').User} User
+ * @typedef {import('../../app/domain/user/types').Playlist} Playlist
+ * @typedef {import('../../app/domain/spi/UserRepository').UserRepository} UserRepository
+ * @typedef {import('./api/Features').Features} Features
+ * @typedef {import('./api/Features').CreatePlaylist} CreatePlaylist
+ */
+
+/**
+ *
+ * @param {UserRepository} userRepository
+ * @returns {Features}
  */
 exports.features = function (userRepository) {
+  /**
+   * @type {([User, Playlist]) => Promise<Playlist>}
+   */
+  const saveUser = ([user, playlist]) => userRepository.save(user).then(() => Promise.resolve(playlist));
+
+  /**
+   * @param {string} playlistName
+   * @returns {(user: User) =>  Promise<[User, Playlist]>}
+   */
+  function addNewPlayListToUser(playlistName) {
+    /**
+     * @param {User} user
+     * @returns { Promise<[User, Playlist]>}
+     */
+    return (user) => user.addNewPlaylist(playlistName);
+  }
+
   return {
     /**
-     * @type {import('./api/Features').CreatePlaylist}
+     * @type {CreatePlaylist}
+     * @returns {Promise<Playlist>}
      */
-    createPlaylist: (userId, playlistName) =>
-      new Promise((resolve) => {
-        userRepository.createPlaylist(userId, playlistName, resolve);
-      }),
+    createPlaylist: (userId, playlistName) => Promise.resolve(
+      userRepository
+        .getByUserId(userId)
+        .then(addNewPlayListToUser(playlistName))
+        .then(saveUser)
+    ),
   };
 };

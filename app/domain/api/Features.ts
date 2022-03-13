@@ -1,4 +1,4 @@
-import { Playlist } from '../Playlist';
+import { Playlist } from '../user/types';
 
 /**
  * Hexagonal Architecture Domain API (primary ports)

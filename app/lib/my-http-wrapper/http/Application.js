@@ -5,7 +5,7 @@ const http = require('http');
 const express = require('express');
 const formidable = require('formidable');
 const qset = require('q-set'); // instead of body-parser, for form fields with brackets
-const { features } = require('../../../domain/api/OpenWhydFeatures');
+const { features } = require('../../../domain/OpenWhydFeatures');
 const LOG_THRESHOLD = process.env.LOG_REQ_THRESHOLD_MS || 500;
 
 // From Response.js

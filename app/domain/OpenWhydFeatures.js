@@ -1,12 +1,12 @@
 //@ts-check
 /**
- * @param {import('../spi/UserRepository').UserRepository} userRepository
- * @returns {import('./Features').Features}
+ * @param {import('./spi/UserRepository').UserRepository} userRepository
+ * @returns {import('./api/Features').Features}
  */
 exports.features = function (userRepository) {
   return {
     /**
-     * @type {import('./Features').CreatePlaylist}
+     * @type {import('./api/Features').CreatePlaylist}
      */
     createPlaylist: (userId, playlistName) =>
       new Promise((resolve) => {

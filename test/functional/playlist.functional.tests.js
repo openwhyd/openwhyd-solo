@@ -49,7 +49,8 @@ describe('playlist', () => {
 
     const savedUser = await userRepository.getByUserId(userNoPlaylist.id);
     assert.equal(savedUser.playlists.length, 1);
-    assert.equal(savedUser.playlists[0], playlist);
+    assert.equal(savedUser.playlists[0].id, playlist.id);
+    assert.equal(savedUser.playlists[0].name, playlist.name);
   });
 
   it('should be created for a user having already a playlist', async () => {
@@ -67,6 +68,7 @@ describe('playlist', () => {
 
     assert.equal(savedUser.playlists.length, previousPlaylistLength + 1);
 
-    assert.equal(savedPlaylist, playlist);
+    assert.equal(savedPlaylist.id, playlist.id);
+    assert.equal(savedPlaylist.name, playlist.name);
   });
 });

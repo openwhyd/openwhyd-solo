@@ -36,10 +36,5 @@ module.exports = class User {
  * @returns {number}
  */
 function nextAvailablePlaylistId(playlists) {
-  return playlists.length === 0
-    ? 0
-    : parseInt(
-        /** @ts-ignore */
-        playlists[playlists.length - 1].id
-      ) + 1;
+  return playlists.length === 0 ? 0 : playlists[playlists.length - 1].id + 1;
 }

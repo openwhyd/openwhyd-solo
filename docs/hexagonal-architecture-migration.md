@@ -32,5 +32,5 @@ git checkout migration-start
 ## JSDoc type checks
 
 ```bash
-npx tsc --noEmit --allowJs `find app/ -name "*.js"`
+npx tsc --target es2015 --moduleResolution node --noEmit --allowJs `find app/ -name "*.js"`
 ```

@@ -1,4 +1,4 @@
-import { Playlist, User } from '../user/types';
+import { User } from '../user/types';
 
 export interface UserRepository {
   getByUserId: GetByUserId;

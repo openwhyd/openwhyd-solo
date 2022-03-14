@@ -5,6 +5,10 @@
  * @author adrienjoly, whyd
  **/
 
+/**
+ * @typedef {import('../infrastructure/mongodb/types').UserDocument} UserDocument
+ */
+
 var mongodb = require('../models/mongodb.js');
 var ObjectId = mongodb.ObjectId; //ObjectID.createFromHexString;
 var postModel = require('../models/post.js');
@@ -195,8 +199,8 @@ function processUserPref(user) {
       user.pref[i] === undefined || user.pref[i] === null
         ? defaultPref[i] // default is better than null/undefined value
         : typeof defaultPref[i] == 'boolean'
-          ? !!user.pref[i]
-          : user.pref[i]; // type existing values accordingly to defaults
+        ? !!user.pref[i]
+        : user.pref[i]; // type existing values accordingly to defaults
   return user;
 }
 
@@ -248,6 +252,9 @@ exports.fetchMulti = function (q, options, handler) {
   });
 };
 
+/**
+ * @type {(uid : string, handler : (user : UserDocument) => void) => void }
+ */
 exports.fetchByUid = exports.model = function (uid, handler) {
   if (typeof uid == 'string') uid = ObjectId(uid);
   fetch({ _id: uid }, function (err, user) {
@@ -317,6 +324,11 @@ exports.update = function (uid, update, handler) {
   );
 };
 
+/**
+ *
+ * @param {UserDocument} pUser
+ * @param {(userDocument:UserDocument) => void} handler
+ */
 exports.save = function (pUser, handler) {
   var uid = pUser._id || pUser.id;
   var criteria = uid
@@ -587,6 +599,7 @@ exports.setTwitterId = function (uId, twId, twTok, twSec, cb) {
           cb({
             error: 'This Twitter account is already associated to another user',
           });
+      //@ts-ignore
       else
         exports.save({ _id: uId, twId: twId, twTok: twTok, twSec: twSec }, cb);
     });
@@ -632,6 +645,7 @@ exports.setHandle = function (uId, username, handler) {
 exports.renameUser = function (uid, name, callback) {
   function whenDone() {
     console.log('renameUser last step: save the actual user record');
+    //@ts-ignore
     exports.save({ _id: uid, name: name }, callback);
   }
   var cols = ['follow', 'post'];

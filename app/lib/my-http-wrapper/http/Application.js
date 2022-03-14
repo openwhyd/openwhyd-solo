@@ -98,6 +98,9 @@ const makeNotFound = (errorHandler) =>
 // Web Application class
 
 exports.Application = class Application {
+  /**
+   * @typedef {import('../../../domain/api/Features').Features} Features
+   */
   constructor(options = {}) {
     this._errorHandler = options.errorHandler || defaultErrorHandler;
     this._sessionMiddleware = options.sessionMiddleware;
@@ -109,10 +112,12 @@ exports.Application = class Application {
     this._expressApp = null; // will be lazy-loaded by getExpressApp()
     this._uploadSettings = options.uploadSettings;
 
-    const userRepository = require('../../../models/user');
+    const {
+      userCollection: userRepository,
+    } = require('../../../infrastructure/mongodb/UserCollection');
 
     /**
-     * @type {import('../../../domain/api/Features').Features}
+     * @type {Features}
      */
     this._features = features(userRepository);
   }

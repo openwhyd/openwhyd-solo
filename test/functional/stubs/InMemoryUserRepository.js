@@ -10,22 +10,21 @@
  * @type {(users : User[]) => UserRepository}
  */
 exports.inMemoryUserRepository = function (users) {
+  const userRepository = new Map(users.map((user) => [user.id, user]));
 
-    const userRepository = new Map(users.map(user => [user.id, user]));
-
-    return {
-        /**
-         * @type {GetByUserId}
-         */
-        getByUserId: function (userId) {
-            return Promise.resolve(userRepository.get(userId));
-        },
-        /**
-         * @type {Save}
-         */
-        save: (user) => {
-            userRepository.set(user.id, user);
-            return Promise.resolve(user)
-        },
-    }
+  return {
+    /**
+     * @type {GetByUserId}
+     */
+    getByUserId: function (userId) {
+      return Promise.resolve(userRepository.get(userId));
+    },
+    /**
+     * @type {Save}
+     */
+    save: (user) => {
+      userRepository.set(user.id, user);
+      return Promise.resolve(user);
+    },
+  };
 };

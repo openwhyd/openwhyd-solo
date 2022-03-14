@@ -16,7 +16,8 @@ exports.features = function (userRepository) {
   /**
    * @type {([User, Playlist]) => Promise<Playlist>}
    */
-  const saveUser = ([user, playlist]) => userRepository.save(user).then(() => Promise.resolve(playlist));
+  const saveUser = ([user, playlist]) =>
+    userRepository.save(user).then(() => Promise.resolve(playlist));
 
   /**
    * @param {string} playlistName
@@ -35,11 +36,12 @@ exports.features = function (userRepository) {
      * @type {CreatePlaylist}
      * @returns {Promise<Playlist>}
      */
-    createPlaylist: (userId, playlistName) => Promise.resolve(
-      userRepository
-        .getByUserId(userId)
-        .then(addNewPlayListToUser(playlistName))
-        .then(saveUser)
-    ),
+    createPlaylist: (userId, playlistName) =>
+      Promise.resolve(
+        userRepository
+          .getByUserId(userId)
+          .then(addNewPlayListToUser(playlistName))
+          .then(saveUser)
+      ),
   };
 };

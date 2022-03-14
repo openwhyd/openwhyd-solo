@@ -599,9 +599,10 @@ exports.setTwitterId = function (uId, twId, twTok, twSec, cb) {
           cb({
             error: 'This Twitter account is already associated to another user',
           });
-      //@ts-ignore
-      else
+      else {
+        // @ts-ignore
         exports.save({ _id: uId, twId: twId, twTok: twTok, twSec: twSec }, cb);
+      }
     });
 };
 

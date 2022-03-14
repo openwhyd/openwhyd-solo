@@ -26,8 +26,8 @@ module.exports = class User {
       id: nextAvailablePlaylistId(this.playlists),
       name: playlistName,
     };
-    const updatedPlaylists = this.playlists.concat(newPlaylist);
-    return Promise.resolve([new User(this.id, updatedPlaylists), newPlaylist]);
+    this.playlists.push(newPlaylist);
+    return Promise.resolve([this, newPlaylist]);
   };
 };
 

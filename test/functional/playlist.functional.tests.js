@@ -13,14 +13,11 @@ const { inMemoryUserRepository } = require('./stubs/InMemoryUserRepository');
 const randomString = () => Math.random().toString(36).substring(2, 9);
 
 describe('playlist', () => {
-  const userNoPlaylist = new User('userNoPlaylist', []);
+  let userNoPlaylist;
 
   const lastExistingPlaylistId = 42;
-  const userWithPlaylist = new User('userWithPlaylist', [
-    { id: lastExistingPlaylistId, name: 'existingPlaylist' },
-  ]);
+  let userWithPlaylist;
 
-  const users = [userNoPlaylist, userWithPlaylist];
   /**
    * @type {CreatePlaylist}
    */
@@ -32,7 +29,13 @@ describe('playlist', () => {
   let userRepository;
 
   beforeEach(() => {
-    userRepository = inMemoryUserRepository(users);
+    userNoPlaylist = new User('userNoPlaylist', []);
+    userWithPlaylist = new User('userWithPlaylist', [
+      { id: lastExistingPlaylistId, name: 'existingPlaylist' },
+    ]);
+
+    userRepository = inMemoryUserRepository([userNoPlaylist, userWithPlaylist]);
+
     ({ createPlaylist } = features(userRepository));
   });
 
@@ -51,9 +54,9 @@ describe('playlist', () => {
 
   it('should be created for a user having already a playlist', async () => {
     const playlistName = randomString();
+    const previousPlaylistLength = userWithPlaylist.playlists.length;
 
     const playlist = await createPlaylist(userWithPlaylist.id, playlistName);
-
     assert.equal(playlist.id, lastExistingPlaylistId + 1);
     assert.equal(playlist.name, playlistName);
 
@@ -62,10 +65,8 @@ describe('playlist', () => {
       (pl) => pl.id == playlist.id
     );
 
-    assert.equal(
-      savedUser.playlists.length,
-      userWithPlaylist.playlists.length + 1
-    );
+    assert.equal(savedUser.playlists.length, previousPlaylistLength + 1);
+
     assert.equal(savedPlaylist, playlist);
   });
 });

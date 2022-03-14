@@ -6,8 +6,8 @@
  * @typedef {import('../../../app/domain/user/types').Playlist} Playlist
  */
 
-const User = require('../../domain/user/User');
 const { fetchByUid, save } = require('../../models/user');
+const { StowawayUser } = require('./StowawayUser');
 
 /**
  * @type {UserRepository}
@@ -17,22 +17,26 @@ exports.userCollection = {
     new Promise((resolve) => fetchByUid(userId, mapToDomainUser(resolve))),
   save: (user) =>
     new Promise((resolve) =>
-      save(mapToUserDocument(user), mapToDomainUser(resolve))
+      save(
+        /**@type {StowawayUser} */ (user).toUserDocument(),
+        mapToDomainUser(resolve)
+      )
     ),
 };
 
 /**
  *
- * @param {(user: UserType) => void } resolve
+ * @param {(user: StowawayUser) => void } resolve
  * @returns {(user: UserDocument) => void}
  */
 function mapToDomainUser(resolve) {
-  return (userDocument) => resolve(new User(userDocument.id, userDocument.pl));
-}
+  return (userDocument) => {
+    userDocument.pl = userDocument.pl || [];
 
-/**
- *
- * @param {UserType} user
- * @returns {UserDocument}
- */
-const mapToUserDocument = (user) => ({ id: user.id, pl: user.playlists });
+    const playlists = userDocument.pl.map(({ id, name }) => ({
+      id: parseInt(id),
+      name,
+    }));
+    return resolve(new StowawayUser(userDocument.id, playlists, userDocument));
+  };
+}

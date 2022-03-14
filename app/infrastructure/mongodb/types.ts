@@ -19,7 +19,7 @@ export interface UserDocument {
   mid: string;
   n: string;
   name: string;
-  pl: { id: number; name: string; nbTracks: number; url: string }[];
+  pl: { id: string; name: string; nbTracks: number; url: string }[];
   pref: {
     emAcc: number;
     emAdd: number;

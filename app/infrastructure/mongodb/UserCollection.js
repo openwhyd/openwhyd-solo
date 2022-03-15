@@ -7,7 +7,7 @@
  */
 
 const { fetchByUid, save } = require('../../models/user');
-const { StowawayUser } = require('./StowawayUser');
+const User = require('../../domain/user/User');
 
 /**
  * @type {UserRepository}
@@ -15,18 +15,38 @@ const { StowawayUser } = require('./StowawayUser');
 exports.userCollection = {
   getByUserId: (userId) =>
     new Promise((resolve) => fetchByUid(userId, mapToDomainUser(resolve))),
-  save: (user) =>
+
+  insertPlaylist: (userId, playlist) =>
     new Promise((resolve) =>
-      save(
-        /**@type {StowawayUser} */ (user).toUserDocument(),
-        mapToDomainUser(resolve)
-      )
+      /*
+       We are forced to use users.fetchByUid() then users.save() otherwise the database model migration won't be performed.
+       But it can be replaced by the following code, if we implement a database migration that adds (id, mid, n, prefs) to all users in the database:
+
+       mongodb.collections['user'].updateOne(
+        { _id: ObjectId(userId) },
+        { $push: { pl: playlist } },
+        (err, result) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        })
+
+       */
+      fetchByUid(userId, (user) => {
+        user.pl = user.pl || [];
+        //@ts-ignore
+        user.pl.push(playlist);
+        //@ts-ignore
+        save(user, resolve);
+      })
     ),
 };
 
 /**
  *
- * @param {(user: StowawayUser) => void } resolve
+ * @param {(user: UserType) => void } resolve
  * @returns {(user: UserDocument) => void}
  */
 function mapToDomainUser(resolve) {
@@ -37,6 +57,6 @@ function mapToDomainUser(resolve) {
       id: parseInt(id),
       name,
     }));
-    return resolve(new StowawayUser(userDocument.id, playlists, userDocument));
+    return resolve(new User(userDocument.id, playlists));
   };
 }

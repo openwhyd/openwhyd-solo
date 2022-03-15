@@ -2,7 +2,7 @@
 /**
  * @typedef {import('../../../app/domain/spi/UserRepository').UserRepository} UserRepository
  * @typedef {import('../../../app/domain/spi/UserRepository').GetByUserId} GetByUserId
- * @typedef {import('../../../app/domain/spi/UserRepository').Save} Save
+ * @typedef {import('../../../app/domain/spi/UserRepository').InsertPlaylist} InsertPlaylist
  * @typedef {import('../../../app/domain/user/types').User} UserType
  */
 
@@ -24,11 +24,11 @@ exports.inMemoryUserRepository = function (users) {
       return Promise.resolve(deepCopyUser(userRepository.get(userId)));
     },
     /**
-     * @type {Save}
+     * @type {InsertPlaylist}
      */
-    save: (user) => {
-      userRepository.set(user.id, user);
-      return Promise.resolve(user);
+    insertPlaylist: (userId, playlist) => {
+      userRepository.get(userId).playlists.push(playlist);
+      return Promise.resolve();
     },
   };
 };

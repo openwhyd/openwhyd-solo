@@ -26,8 +26,10 @@ module.exports = class User {
       id: nextAvailablePlaylistId(this.playlists),
       name: playlistName,
     };
-    this.playlists.push(newPlaylist);
-    return Promise.resolve([this, newPlaylist]);
+    return Promise.resolve([
+      new User(this.id, [...this.playlists, newPlaylist]),
+      newPlaylist,
+    ]);
   };
 };
 
@@ -36,5 +38,5 @@ module.exports = class User {
  * @returns {number}
  */
 function nextAvailablePlaylistId(playlists) {
-  return playlists.length === 0 ? 0 : playlists[playlists.length - 1].id + 1;
+  return Math.max(...playlists.map(({ id }) => id), -1) + 1;
 }

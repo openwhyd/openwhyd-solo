@@ -7,7 +7,6 @@
 var snip = require('../../snip.js');
 var mongodb = require('../../models/mongodb.js');
 var postModel = require('../../models/post.js');
-var userModel = require('../../models/user.js');
 var commentModel = require('../../models/comment.js');
 var lastFm = require('./lastFm.js').lastFm;
 
@@ -58,7 +57,10 @@ exports.actions = {
 
   deleteComment: commentModel.delete,
 
-  insert: async function (httpRequestParams, callback) {
+  /**
+   * @param createPlaylist {import('../../domain/api/Features').CreatePlaylist}
+   */
+  insert: async function (httpRequestParams, callback, _, { createPlaylist }) {
     var postRequest = {
       uId: httpRequestParams.uId,
       uNm: httpRequestParams.uNm,
@@ -111,12 +113,9 @@ exports.actions = {
     const playlistRequest = extractPlaylistRequestFrom(httpRequestParams);
 
     if (needToCreatePlaylist(playlistRequest)) {
-      postRequest.pl = await new Promise((resolve) =>
-        userModel.createPlaylist(
-          httpRequestParams.uId,
-          playlistRequest.name,
-          resolve
-        )
+      postRequest.pl = await createPlaylist(
+        httpRequestParams.uId,
+        playlistRequest.name
       );
     } else if (hasAValidPlaylistId(playlistRequest.id)) {
       postRequest.pl = {
@@ -208,7 +207,10 @@ exports.actions = {
   },
 };
 
-exports.handleRequest = function (request, reqParams, response) {
+/**
+ * @param features {import('../../domain/api/Features').Features}
+ */
+exports.handleRequest = function (request, reqParams, response, features) {
   request.logToConsole('api.post.handleRequest', reqParams);
 
   function resultHandler(res, args) {
@@ -236,21 +238,26 @@ exports.handleRequest = function (request, reqParams, response) {
   if (!user || !user.id) return response.badRequest();
 
   if (reqParams.action && exports.actions[reqParams.action])
-    exports.actions[reqParams.action](reqParams, resultHandler, request);
+    exports.actions[reqParams.action](
+      reqParams,
+      resultHandler,
+      request,
+      features
+    );
   else response.badRequest();
 };
 
 /**
- * @param domain {import('../../domain/Domain').Domain}
+ * @param features {import('../../domain/api/Features').Features}
  */
-exports.controller = function (request, getParams, response, domain) {
+exports.controller = function (request, getParams, response, features) {
   //request.logToConsole("api.post", getParams);
   var params = snip.translateFields(getParams || {}, sequencedParameters);
 
   //if (request.method.toLowerCase() === 'post')
   for (let i in request.body) params[i] = request.body[i];
 
-  exports.handleRequest(request, params, response);
+  exports.handleRequest(request, params, response, features);
 };
 
 function hasAValidPlaylistId(id) {

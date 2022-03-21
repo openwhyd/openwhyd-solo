@@ -69,8 +69,6 @@ describe(`post api`, function () {
     assert.equal(postedTrack.eId, post.eId);
   });
 
-  // TODO: "should add a track from a blog"
-
   it('should add a track', async function () {
     const name = randomString();
     const ctx = 'bk';
@@ -153,8 +151,6 @@ describe(`post api`, function () {
     assert.equal(postedTrack.uNm, ADMIN_USER.name);
   });
 
-  // TODO: should add a track to a new playlist from the bookmarklet
-
   it('should add a track to a new playlist', async function () {
     const name = randomString();
     const ctx = 'bk';
@@ -232,10 +228,6 @@ describe(`post api`, function () {
     assert.equal(postedTrack.uId, ADMIN_USER.id);
     assert.equal(postedTrack.uNm, ADMIN_USER.name);
   });
-
-  // TODO: "should warn if about to add a track that I already posted in the past" Note : wasn't able to reproduce this.
-
-  // TODO: fix consistency in naming of tests
 
   it('should re-add a track to a new playlist from the stream or from the Tracks in the user profile', async function () {
     const { body } = await util.promisify(api.addPost)(jar, post);

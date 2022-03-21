@@ -1,8 +1,13 @@
+//@ts-check
 /**
  * user model
  * fetch user information from mongodb
  * @author adrienjoly, whyd
  **/
+
+/**
+ * @typedef {import('../infrastructure/mongodb/types').UserDocument} UserDocument
+ */
 
 var mongodb = require('../models/mongodb.js');
 var ObjectId = mongodb.ObjectId; //ObjectID.createFromHexString;
@@ -247,6 +252,9 @@ exports.fetchMulti = function (q, options, handler) {
   });
 };
 
+/**
+ * @type {(uid : string, handler : (user : UserDocument) => void) => void }
+ */
 exports.fetchByUid = exports.model = function (uid, handler) {
   if (typeof uid == 'string') uid = ObjectId(uid);
   fetch({ _id: uid }, function (err, user) {
@@ -316,6 +324,11 @@ exports.update = function (uid, update, handler) {
   );
 };
 
+/**
+ *
+ * @param {UserDocument} pUser
+ * @param {(userDocument:UserDocument) => void} handler
+ */
 exports.save = function (pUser, handler) {
   var uid = pUser._id || pUser.id;
   var criteria = uid
@@ -426,22 +439,6 @@ exports.hasPlaylistNameByUid = function (uId, name, cb) {
   });
 };
 
-exports.createPlaylist = function (uId, name, handler) {
-  // console.log('user.createPlaylist', uId, name);
-  fetch({ _id: uId }, function (err, user) {
-    user.pl = user.pl || [];
-    var pl = {
-      id: user.pl.length > 0 ? parseInt(user.pl[user.pl.length - 1].id) + 1 : 0,
-      name: name,
-    };
-    user.pl.push(pl);
-    exports.save(user, function () {
-      // console.log('created playlist:', pl.name, pl.id);
-      handler(pl);
-    });
-  });
-};
-
 exports.setPlaylist = function (uId, plId, upd, handler) {
   upd = upd || {};
   console.log('user.setPlaylist', uId, plId, upd);
@@ -477,26 +474,26 @@ exports.renamePlaylist = function (uId, plId, plName, handler) {
 };
 /*
 exports.setPlaylistImg = function(uId, plId, img, cb) {
-	console.log("user.setPlaylistImg", uId, plId, img);
-	fetch({_id:uId}, function(err, user) {
-		var found = true;
-		user.pl = user.pl || [];
-		for (let i in user.pl)
-			if (""+user.pl[i].id == ""+plId) {
-				if (img || img.indexOf("blank") == -1)
-					user.pl[i].img = img;
-				else
-					delete user.pl[i].img;
-				found = user.pl[i];
-				break;
-			}
-		if (found)
-			exports.save(user, function() {
-				cb(found);
-			});
-		else if (cb)
-			cb();
-	});
+  console.log("user.setPlaylistImg", uId, plId, img);
+  fetch({_id:uId}, function(err, user) {
+    var found = true;
+    user.pl = user.pl || [];
+    for (let i in user.pl)
+      if (""+user.pl[i].id == ""+plId) {
+        if (img || img.indexOf("blank") == -1)
+          user.pl[i].img = img;
+        else
+          delete user.pl[i].img;
+        found = user.pl[i];
+        break;
+      }
+    if (found)
+      exports.save(user, function() {
+        cb(found);
+      });
+    else if (cb)
+      cb();
+  });
 }
 */
 exports.deletePlaylist = function (uId, plId, handler) {
@@ -602,8 +599,10 @@ exports.setTwitterId = function (uId, twId, twTok, twSec, cb) {
           cb({
             error: 'This Twitter account is already associated to another user',
           });
-      else
+      else {
+        // @ts-ignore
         exports.save({ _id: uId, twId: twId, twTok: twTok, twSec: twSec }, cb);
+      }
     });
 };
 
@@ -647,6 +646,7 @@ exports.setHandle = function (uId, username, handler) {
 exports.renameUser = function (uid, name, callback) {
   function whenDone() {
     console.log('renameUser last step: save the actual user record');
+    //@ts-ignore
     exports.save({ _id: uid, name: name }, callback);
   }
   var cols = ['follow', 'post'];
@@ -743,28 +743,28 @@ exports.fetchPlaylists = function (user, params, cb) {
     }
   );
   /*
-	function handlePlaylist(playlist, countNext) {
-		var plUid = playlist.collabId ? null : uId;
-		var plId = playlist.collabId || playlist.id;
-		postModel.countPlaylistPosts(plUid, plId, function(count) {
-			playlist.nbTracks = count;
-			// if (count && count > 0)
-			// 	postModel.fetchPlaylistPosts(plUid, plId, {limit:2}, function(posts) {
-			// 		playlist.lastPosts = posts;
-			// 		countNext();
-			// 	});
-			// else
-				countNext();
-		});
-	}
-	// collabModel.fetchPlaylistsByUid(uId, function(playlists){
-	// 	for(var i in playlists)
-	// 		pl.push({
-	// 			collabId: playlists[i]._id,
-	// 			name: playlists[i].name,
-	// 			url: "/playlist/" + playlists[i]._id
-	// 		});
-		snip.forEachArrayItem((pl || []).reverse(), handlePlaylist, cb);
-	//});
-	*/
+  function handlePlaylist(playlist, countNext) {
+    var plUid = playlist.collabId ? null : uId;
+    var plId = playlist.collabId || playlist.id;
+    postModel.countPlaylistPosts(plUid, plId, function(count) {
+      playlist.nbTracks = count;
+      // if (count && count > 0)
+      // 	postModel.fetchPlaylistPosts(plUid, plId, {limit:2}, function(posts) {
+      // 		playlist.lastPosts = posts;
+      // 		countNext();
+      // 	});
+      // else
+        countNext();
+    });
+  }
+  // collabModel.fetchPlaylistsByUid(uId, function(playlists){
+  // 	for(var i in playlists)
+  // 		pl.push({
+  // 			collabId: playlists[i]._id,
+  // 			name: playlists[i].name,
+  // 			url: "/playlist/" + playlists[i]._id
+  // 		});
+    snip.forEachArrayItem((pl || []).reverse(), handlePlaylist, cb);
+  //});
+  */
 };

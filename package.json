@@ -16,6 +16,7 @@
     "start:coverage:no-clean": "npx nyc --silent --no-clean node app.js $@",
     "start:localdb": "node app.js $@ --mongoDbDatabase openwhyd_test --mongoDbHost localhost --mongoDbPort 27117",
     "test-reset": "node test/reset-test-db.js",
+    "test:functional": "npx mocha test/functional/*.js --exit",
     "test:integration": "npx mocha test/integration/*.js --serial --exit",
     "test:unit": "npx mocha test/unit/*.js --exit",
     "test:cypress:dev": "node_modules/.bin/cypress open",
@@ -34,11 +35,11 @@
     "lint": "eslint .",
     "test:integration:legacy-post": "START_WITH_ENV_FILE='./env-vars-testing.conf' mocha test/integration/legacy.post.api.tests.js $@",
     "test:integration:legacy-post:coverage": "rm -rf .nyc_output coverage && COVERAGE=true npm run test:integration:legacy-post -- --serial --timeout 10000 && npx nyc report --reporter=lcov && npx nyc report | grep post",
-    "test:integration:post": "START_WITH_ENV_FILE='./env-vars-testing.conf' mocha test/integration/*post.api.tests.js $@",
+    "test:integration:post": "START_WITH_ENV_FILE='./env-vars-testing.conf' mocha test/integration/*post.api.tests.js test/integration/playlist.api.tests.js $@",
     "test:integration:post:coverage": "rm -rf .nyx_output coverage && COVERAGE=true npm run test:integration:post -- --serial --timeout 10000 && npx nyc report --reporter=lcov && npx nyc report | grep post",
     "test:approval": "START_WITH_ENV_FILE='./env-vars-testing.conf' mocha test/approval/approval.tests.js $@",
     "test:approval:coverage": "rm -rf .nyc_output coverage && COVERAGE=true npm run test:approval -- --serial --timeout 10000 $@ && npx nyc report --reporter=lcov && npx nyc report | grep post",
-    "test:post:coverage": "rm -rf .nyc_output coverage && COVERAGE=true npm run test:approval -- --serial --timeout 10000 && COVERAGE=true npm run test:integration:post -- --serial --timeout 10000 && npx nyc report --reporter=lcov && npx nyc report | grep post"
+    "test:post:coverage": "rm -rf .nyc_output coverage && COVERAGE=true npm run test:unit -- --serial && COVERAGE=true npm run test:functional -- --serial && COVERAGE=true npm run test:approval -- --serial --timeout 10000 && COVERAGE=true npm run test:integration:post -- --serial --timeout 10000 && npx nyc report --reporter=lcov && npx nyc report | grep post"
   },
   "directories": {
     "src": "./app",
@@ -68,6 +69,8 @@
     "@typescript-eslint/eslint-plugin": "^5.1.0",
     "@typescript-eslint/parser": "^5.1.0",
     "approvals": "^4.0.0-beta.1",
+    "chai": "^4.3.6",
+    "chai-exclude": "^2.1.0",
     "cypress": "^8.6.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-log-to-output": "^1.1.2",

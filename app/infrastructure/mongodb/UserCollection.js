@@ -18,19 +18,9 @@ exports.userCollection = {
     new Promise((resolve) => fetchByUid(userId, mapToDomainUser(resolve))),
 
   insertPlaylist: (userId, playlist) =>
-    // TODO: return updateOne() function's promise directly, if possible, instead of recreating our own
-    new Promise((resolve, reject) =>
-      mongodb.collections['user'].updateOne(
-        { _id: mongodb.ObjectId(userId) },
-        { $push: { pl: playlist } },
-        (err, result) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        }
-      )
+    mongodb.collections['user'].updateOne(
+      { _id: mongodb.ObjectId(userId) },
+      { $push: { pl: playlist } }
     ),
 };
 

@@ -6,7 +6,6 @@
  * @typedef {import('../../../app/domain/user/types').Playlist} Playlist
  */
 
-const { fetchByUid } = require('../../models/user');
 const User = require('../../domain/user/User');
 const mongodb = require('../../models/mongodb');
 
@@ -15,8 +14,9 @@ const mongodb = require('../../models/mongodb');
  */
 exports.userCollection = {
   getByUserId: (userId) =>
-    new Promise((resolve) => fetchByUid(userId, mapToDomainUser(resolve))),
-
+    mongodb.collections['user']
+      .findOne({ _id: mongodb.ObjectId(userId) })
+      .then(mapToDomainUser),
   insertPlaylist: (userId, playlist) =>
     mongodb.collections['user'].updateOne(
       { _id: mongodb.ObjectId(userId) },
@@ -26,17 +26,15 @@ exports.userCollection = {
 
 /**
  *
- * @param {(user: UserType) => void } resolve
- * @returns {(user: UserDocument) => void}
+ * @param {UserDocument} userDocument
+ * @returns {UserType}
  */
-function mapToDomainUser(resolve) {
-  return (userDocument) => {
-    userDocument.pl = userDocument.pl || [];
+function mapToDomainUser(userDocument) {
+  userDocument.pl = userDocument.pl || [];
 
-    const playlists = userDocument.pl.map(({ id, name }) => ({
-      id: parseInt(id),
-      name,
-    }));
-    return resolve(new User(userDocument.id, playlists));
-  };
+  const playlists = userDocument.pl.map(({ id, name }) => ({
+    id: parseInt(id),
+    name,
+  }));
+  return new User(userDocument._id.toString(), playlists);
 }

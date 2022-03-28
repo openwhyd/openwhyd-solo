@@ -6,57 +6,35 @@
  * @typedef {import('../../../app/domain/user/types').Playlist} Playlist
  */
 
-const { fetchByUid, save } = require('../../models/user');
 const User = require('../../domain/user/User');
+const mongodb = require('../../models/mongodb');
 
 /**
  * @type {UserRepository}
  */
 exports.userCollection = {
   getByUserId: (userId) =>
-    new Promise((resolve) => fetchByUid(userId, mapToDomainUser(resolve))),
-
+    mongodb.collections['user']
+      .findOne({ _id: mongodb.ObjectId(userId) })
+      .then(mapToDomainUser),
   insertPlaylist: (userId, playlist) =>
-    new Promise((resolve) =>
-      /*
-       We are forced to use users.fetchByUid() then users.save() otherwise the database model migration won't be performed.
-       But it can be replaced by the following code, if we implement a database migration that adds (id, mid, n, prefs) to all users in the database:
-
-       mongodb.collections['user'].updateOne(
-        { _id: ObjectId(userId) },
-        { $push: { pl: playlist } },
-        (err, result) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(result);
-          }
-        })
-
-       */
-      fetchByUid(userId, (user) => {
-        user.pl = user.pl || [];
-        //@ts-ignore
-        user.pl.push(playlist);
-        //@ts-ignore
-        save(user, resolve);
-      })
+    mongodb.collections['user'].updateOne(
+      { _id: mongodb.ObjectId(userId) },
+      { $push: { pl: playlist } }
     ),
 };
 
 /**
  *
- * @param {(user: UserType) => void } resolve
- * @returns {(user: UserDocument) => void}
+ * @param {UserDocument} userDocument
+ * @returns {UserType}
  */
-function mapToDomainUser(resolve) {
-  return (userDocument) => {
-    userDocument.pl = userDocument.pl || [];
+function mapToDomainUser(userDocument) {
+  userDocument.pl = userDocument.pl || [];
 
-    const playlists = userDocument.pl.map(({ id, name }) => ({
-      id: parseInt(id),
-      name,
-    }));
-    return resolve(new User(userDocument.id, playlists));
-  };
+  const playlists = userDocument.pl.map(({ id, name }) => ({
+    id: parseInt(id),
+    name,
+  }));
+  return new User(userDocument._id.toString(), playlists);
 }

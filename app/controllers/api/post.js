@@ -10,15 +10,12 @@ var mongodb = require('../../models/mongodb.js');
 var postModel = require('../../models/post.js');
 var userModel = require('../../models/user.js');
 var commentModel = require('../../models/comment.js');
+const features = require('../../domain/features');
 var lastFm = require('./lastFm.js').lastFm;
 
-var sequencedParameters = { _1: 'pId', _2: 'action' }; //[null, "pId", "action"];
+const { createPlaylist } = features(userModel);
 
-/** @type {import("../../domain/types").CreatePlaylist} */
-const createPlaylist = (userId, playlistName) =>
-  new Promise((resolve) =>
-    userModel.createPlaylist(userId, playlistName, resolve)
-  );
+var sequencedParameters = { _1: 'pId', _2: 'action' }; //[null, "pId", "action"];
 
 function getBrowserVersionFromUserAgent(ua) {
   // reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#Browser_Name

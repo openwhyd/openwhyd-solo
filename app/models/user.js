@@ -429,7 +429,7 @@ exports.hasPlaylistNameByUid = function (uId, name, cb) {
 /**
  * @param {number} uId
  * @param {string} name
- * @param {(playlist: import("../domain/types").Playlist) => void} handler
+ * @param {(playlist: import("../domain/api").Playlist) => void} handler
  */
 exports.createPlaylist = function (uId, name, handler) {
   // console.log('user.createPlaylist', uId, name);

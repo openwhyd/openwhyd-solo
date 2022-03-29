@@ -16,6 +16,7 @@ const MONGODB_URL =
 
 approvals.configure({
   reporters: ['nodediff'], // displays colors in diff
+  forceApproveAll: process.env.AUTO_APPROVE === 'true',
 });
 
 const scrubObjectId =
@@ -98,6 +99,7 @@ describe('When setting up a new test environment', function () {
 describe('When posting a track', () => {
   let context;
   let postedTrack;
+  let scrub;
 
   before(async () => {
     context = await setupTestEnv();
@@ -108,20 +110,25 @@ describe('When posting a track', () => {
     };
     const { jar } = await util.promisify(context.api.loginAs)(user);
     postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
+    scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
   });
 
   after(() => teardownTestEnv(context));
 
   it('should be listed in the "post" db collection', async function () {
-    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
+  });
+
+  it('should be provided in the API response', async function () {
+    this.verifyAsJSON(scrub(postedTrack));
   });
 });
 
 describe('When posting a track using the bookmarklet', function () {
   let context;
   let postedTrack;
+  let scrub;
 
   before(async () => {
     context = await setupTestEnv();
@@ -129,14 +136,18 @@ describe('When posting a track using the bookmarklet', function () {
     const post = makePostFromBk(user);
     const { jar } = await util.promisify(context.api.loginAs)(user);
     postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
+    scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
   });
 
   after(() => teardownTestEnv(context));
 
   it('should be listed in the "post" db collection', async function () {
-    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
+  });
+
+  it('should be provided in the API response', async function () {
+    this.verifyAsJSON(scrub(postedTrack));
   });
 });
 
@@ -144,6 +155,7 @@ describe('When posting a track using the bookmarklet, using a HTTP GET request',
   let context;
   let postedTrack;
   const pl = { id: '2', name: '🎸 Rock' }; // existing playlist
+  let scrub;
 
   before(async () => {
     context = await setupTestEnv();
@@ -171,14 +183,18 @@ describe('When posting a track using the bookmarklet, using a HTTP GET request',
         )
       )
     );
+    scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
   });
 
   after(() => teardownTestEnv(context));
 
   it('should be listed in the "post" db collection', async function () {
-    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
+  });
+
+  it('should be provided in the API response', async function () {
+    this.verifyAsJSON(scrub(postedTrack));
   });
 });
 
@@ -186,6 +202,8 @@ describe('When renaming a track', function () {
   const newName = 'coucou';
   let context;
   let postedTrack;
+  let renamedTrack;
+  let scrub;
 
   before(async () => {
     context = await setupTestEnv();
@@ -194,7 +212,7 @@ describe('When renaming a track', function () {
     postedTrack = (await context.dumpMongoCollection(MONGODB_URL, 'post'))[0];
 
     const { jar } = await util.promisify(context.api.loginAs)(user);
-    await new Promise((resolve, reject) =>
+    const renameResponse = await new Promise((resolve, reject) =>
       request.post(
         {
           jar,
@@ -211,22 +229,28 @@ describe('When renaming a track', function () {
           error ? reject(error) : resolve({ response, body })
       )
     );
+    renamedTrack = JSON.parse(renameResponse.body);
+    scrub = context.makeJSONScrubber([
+      scrubObjectId(postedTrack._id.toString()),
+    ]);
   });
 
   after(() => teardownTestEnv(context));
 
   it('should be listed with new name in the "post" db collection', async function () {
-    const scrub = context.makeJSONScrubber([
-      scrubObjectId(postedTrack._id.toString()),
-    ]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
+  });
+
+  it('should include the new name in the API response', async function () {
+    this.verifyAsJSON(scrub(renamedTrack));
   });
 });
 
 describe('When posting a track to an existing playlist', function () {
   let context;
   let postedTrack;
+  let scrub;
   const pl = { id: '2', name: '🎸 Rock' };
 
   before(async () => {
@@ -235,12 +259,12 @@ describe('When posting a track to an existing playlist', function () {
     const post = { ...makePostFromBk(user), pl };
     const { jar } = await util.promisify(context.api.loginAs)(user);
     postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
+    scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
   });
 
   after(() => teardownTestEnv(context));
 
   it('should be listed in the "post" db collection', async function () {
-    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
   });
@@ -249,11 +273,16 @@ describe('When posting a track to an existing playlist', function () {
     const dbUsers = await context.dumpMongoCollection(MONGODB_URL, 'user');
     this.verifyAsJSON(dbUsers);
   });
+
+  it('should be provided in the API response', async function () {
+    this.verifyAsJSON(scrub(postedTrack));
+  });
 });
 
 describe('When posting a track to a new playlist', function () {
   let context;
   let postedTrack;
+  let scrub;
   const pl = { id: 'create', name: 'My New Playlist' };
 
   before(async () => {
@@ -262,12 +291,12 @@ describe('When posting a track to a new playlist', function () {
     const post = { ...makePostFromBk(user), pl };
     const { jar } = await util.promisify(context.api.loginAs)(user);
     postedTrack = (await util.promisify(context.api.addPost)(jar, post)).body;
+    scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
   });
 
   after(() => teardownTestEnv(context));
 
   it('should be listed in the "post" db collection', async function () {
-    const scrub = context.makeJSONScrubber([scrubObjectId(postedTrack._id)]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
   });
@@ -276,12 +305,17 @@ describe('When posting a track to a new playlist', function () {
     const dbUsers = await context.dumpMongoCollection(MONGODB_URL, 'user');
     this.verifyAsJSON(dbUsers); // Note: this reveals a bug in the automatic numbering of new playlists, when playlists are listed in reverse order, cf https://github.com/openwhyd/openwhyd-solo/blob/73734c0ab665f6701af7aa8b5b9ce635ad8a2b2f/app/models/user.js#L434
   });
+
+  it('should be provided in the API response', async function () {
+    this.verifyAsJSON(scrub(postedTrack));
+  });
 });
 
 describe('When reposting a track to an existing playlist', function () {
   let context;
   let originalTrack;
   let repostedTrack;
+  let scrub;
   const pl = { id: '2', name: '🎸 Rock' };
 
   before(async () => {
@@ -299,15 +333,15 @@ describe('When reposting a track to an existing playlist', function () {
         pl,
       })
     ).body;
+    scrub = context.makeJSONScrubber([
+      scrubObjectId(originalTrack._id),
+      scrubObjectId(repostedTrack._id),
+    ]);
   });
 
   after(() => teardownTestEnv(context));
 
   it('should both be listed in the "post" db collection', async function () {
-    const scrub = context.makeJSONScrubber([
-      scrubObjectId(originalTrack._id),
-      scrubObjectId(repostedTrack._id),
-    ]);
     const dbPosts = await context.dumpMongoCollection(MONGODB_URL, 'post');
     this.verifyAsJSON(scrub(dbPosts));
   });
@@ -315,5 +349,9 @@ describe('When reposting a track to an existing playlist', function () {
   it('should not update the user\'s playlists in the "user" db collection', async function () {
     const dbUsers = await context.dumpMongoCollection(MONGODB_URL, 'user');
     this.verifyAsJSON(dbUsers);
+  });
+
+  it('should be provided in the API response', async function () {
+    this.verifyAsJSON(scrub(repostedTrack));
   });
 });

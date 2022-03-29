@@ -1,3 +1,5 @@
+// @ts-check
+
 /**
  * api endpoint for posts
  * @author adrienjoly, whyd
@@ -11,6 +13,12 @@ var commentModel = require('../../models/comment.js');
 var lastFm = require('./lastFm.js').lastFm;
 
 var sequencedParameters = { _1: 'pId', _2: 'action' }; //[null, "pId", "action"];
+
+/** @type {import("../../domain/types").CreatePlaylist} */
+const createPlaylist = (userId, playlistName) =>
+  new Promise((resolve) =>
+    userModel.createPlaylist(userId, playlistName, resolve)
+  );
 
 function getBrowserVersionFromUserAgent(ua) {
   // reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Browser_detection_using_the_user_agent#Browser_Name
@@ -107,12 +115,9 @@ exports.actions = {
 
     const playlistRequest = extractPlaylistRequestFrom(httpRequestParams);
     if (needToCreatePlaylist(playlistRequest)) {
-      const playlist = await new Promise((resolve) =>
-        userModel.createPlaylist(
-          httpRequestParams.uId,
-          playlistRequest.name,
-          resolve
-        )
+      const playlist = await createPlaylist(
+        httpRequestParams.uId,
+        playlistRequest.name
       );
       if (playlist) {
         postRequest.pl = playlist;

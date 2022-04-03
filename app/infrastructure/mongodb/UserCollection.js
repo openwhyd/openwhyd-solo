@@ -30,6 +30,10 @@ exports.userCollection = {
  * @returns {UserType}
  */
 function mapToDomainUser(userDocument) {
+  if(userDocument == null) {
+    throw Error('User is unknown');
+  }
+
   userDocument.pl = userDocument.pl || [];
 
   const playlists = userDocument.pl.map(({ id, name }) => ({

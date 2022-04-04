@@ -32,7 +32,7 @@ exports.userCollection = {
  */
 function checkUserIsValid(userDocument) {
   if (userDocument == null) {
-    throw Error('User is unknown'); 
+    throw Error('User is unknown');
   }
   return userDocument;
 }
@@ -43,7 +43,6 @@ function checkUserIsValid(userDocument) {
  * @returns {UserType}
  */
 function mapToDomainUser(userDocument) {
-
   userDocument.pl = userDocument.pl || [];
 
   const playlists = userDocument.pl.map(({ id, name }) => ({

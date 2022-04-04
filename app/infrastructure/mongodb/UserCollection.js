@@ -16,6 +16,7 @@ exports.userCollection = {
   getByUserId: (userId) =>
     mongodb.collections['user']
       .findOne({ _id: mongodb.ObjectId(userId) })
+      .then(checkUserIsValid)
       .then(mapToDomainUser),
   insertPlaylist: (userId, playlist) =>
     mongodb.collections['user'].updateOne(
@@ -27,12 +28,21 @@ exports.userCollection = {
 /**
  *
  * @param {UserDocument} userDocument
+ * @returns {UserDocument}
+ */
+function checkUserIsValid(userDocument) {
+  if (userDocument == null) {
+    throw Error('User is unknown'); 
+  }
+  return userDocument;
+}
+
+/**
+ *
+ * @param {UserDocument} userDocument
  * @returns {UserType}
  */
 function mapToDomainUser(userDocument) {
-  if (userDocument == null) {
-    throw Error('User is unknown');
-  }
 
   userDocument.pl = userDocument.pl || [];
 

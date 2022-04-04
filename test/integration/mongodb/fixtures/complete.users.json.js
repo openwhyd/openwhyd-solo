@@ -419,5 +419,5 @@ module.exports = ({ ObjectId }) => [
       mnSub: -1,
       pendEN: 0,
     },
-  }
+  },
 ];

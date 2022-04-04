@@ -6,8 +6,8 @@ var DB_INIT_SCRIPTS = [
   './config/initdb_testing.js', // creates an admin user => should not be run on production!
 ];
 
-if( process.env['WITHOUT_CONSOLE_LOG'] == 'true' ) {
-  console.log = () => {}
+if (process.env['WITHOUT_CONSOLE_LOG'] == 'true') {
+  console.log = () => {};
 } // In order to have nice console summary
 
 process.appParams = {

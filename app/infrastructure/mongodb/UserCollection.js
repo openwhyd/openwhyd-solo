@@ -30,7 +30,7 @@ exports.userCollection = {
  * @returns {UserType}
  */
 function mapToDomainUser(userDocument) {
-  if(userDocument == null) {
+  if (userDocument == null) {
     throw Error('User is unknown');
   }
 

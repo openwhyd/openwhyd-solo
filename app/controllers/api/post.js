@@ -8,12 +8,13 @@
 var snip = require('../../snip.js');
 var mongodb = require('../../models/mongodb.js');
 var postModel = require('../../models/post.js');
-var userModel = require('../../models/user.js');
 var commentModel = require('../../models/comment.js');
 const features = require('../../domain/features');
 var lastFm = require('./lastFm.js').lastFm;
 
-const { createPlaylist } = features(userModel);
+const userCollection = require('../../infrastructure/userCollection');
+
+const { createPlaylist } = features(userCollection);
 
 var sequencedParameters = { _1: 'pId', _2: 'action' }; //[null, "pId", "action"];
 

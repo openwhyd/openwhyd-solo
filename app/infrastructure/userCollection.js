@@ -11,17 +11,24 @@ const userCollection = {
     );
   },
   getByUserId: async function (userId) {
-    const user = await mongodb.collections.user.findOne({
+    /** @type { import("./types").UserDocument } */
+    const userDocument = await mongodb.collections.user.findOne({
       _id: mongodb.ObjectId(userId),
     });
-    return {
-      ...user,
-      playlists: (user.pl || []).map((playlist) => ({
-        id: parseInt(playlist.id, 10),
-        name: playlist.name,
-      })),
-    };
+    return mapToUser(userDocument);
   },
 };
+
+/** @param { import("./types").UserDocument } userDocument */
+/** @returns { import("../domain/types").User } */
+function mapToUser(userDocument) {
+  return {
+    id: userDocument._id.toString(),
+    playlists: (userDocument.pl || []).map((playlist) => ({
+      id: parseInt(playlist.id, 10),
+      name: playlist.name,
+    })),
+  };
+}
 
 module.exports = userCollection;

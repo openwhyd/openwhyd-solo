@@ -11,20 +11,16 @@ const users = [
   },
   {
     id: 'user_with_playlist',
-    playlists: [{ id: 1, name: 'my playlist' }],
+    playlists: [{ id: 0, name: 'my playlist' }],
   },
 ];
 
 /** @type {import('../../app/domain/spi').UserRepository} */
 const userRepository = {
-  insertPlaylist(userId, playlistName) {
+  insertPlaylist(userId, playlist) {
     const user = users.find((user) => user.id === userId);
-    const id = user.playlists.length + 1;
-    user.playlists.push({
-      id,
-      name: playlistName,
-    });
-    return Promise.resolve({ id, name: playlistName });
+    user.playlists.push(playlist);
+    return Promise.resolve(playlist);
   },
   getByUserId(userId) {
     return Promise.resolve({ ...users.find((user) => user.id === userId) });
@@ -38,7 +34,7 @@ describe('playlist', () => {
     const userId = 'user_without_playlist';
     const playlistName = 'coucou';
     const playlist = await createPlaylist(userId, playlistName);
-    assert.equal(playlist.id, 1);
+    assert.equal(playlist.id, 0);
     assert.equal(playlist.name, playlistName);
     const user = await userRepository.getByUserId(userId);
     assert.equal(user.playlists.length, 1);
@@ -49,7 +45,7 @@ describe('playlist', () => {
     const userId = 'user_with_playlist';
     const playlistName = 'coucou';
     const playlist = await createPlaylist(userId, playlistName);
-    assert.equal(playlist.id, 2);
+    assert.equal(playlist.id, 1);
     assert.equal(playlist.name, playlistName);
     const user = await userRepository.getByUserId(userId);
     assert.equal(user.playlists.length, 2);

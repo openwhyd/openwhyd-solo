@@ -17,14 +17,14 @@ const users = [
 
 /** @type {import('../../app/domain/spi').UserRepository} */
 const userRepository = {
-  createPlaylist(userId, playlistName, callback) {
+  insertPlaylist(userId, playlistName) {
     const user = users.find((user) => user.id === userId);
     const id = user.playlists.length + 1;
     user.playlists.push({
       id,
       name: playlistName,
     });
-    callback({ id, name: playlistName });
+    return Promise.resolve({ id, name: playlistName });
   },
   getByUserId(userId) {
     return Promise.resolve({ ...users.find((user) => user.id === userId) });

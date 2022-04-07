@@ -2,7 +2,5 @@
 module.exports = (userRepository) => ({
   /** @type {import("./api").CreatePlaylist} */
   createPlaylist: (userId, playlistName) =>
-    new Promise((resolve) =>
-      userRepository.createPlaylist(userId, playlistName, resolve)
-    ),
+    userRepository.insertPlaylist(userId, playlistName),
 });

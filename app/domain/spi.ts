@@ -1,10 +1,6 @@
 import { Playlist, User } from './types';
 
 export type UserRepository = {
-  createPlaylist(
-    userId: string,
-    playlistName: string,
-    callback: (playlist: Playlist) => void
-  ): void;
+  insertPlaylist(userId: string, playlistName: string): Promise<Playlist>;
   getByUserId(userId: string): Promise<User>;
 };

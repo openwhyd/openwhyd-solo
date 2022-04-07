@@ -25,6 +25,7 @@
     "cvrImg": "/uCoverImg/6664b7078abc88281847e617eb8d3e4a_960x.jpg",
     "email": "dummy@openwhyd.org",
     "handle": "adrien",
+    "id": "4d94501d1f78ac091dbc9b4d",
     "img": "/uAvatarImg/upload_945ec85f203b3251d4adb1cd6ec0fb43_180x.jpg",
     "lnk": {
       "home": "https://adrienjoly.com/now",
@@ -32,6 +33,8 @@
     },
     "loc": "Montreuil / Paris, France",
     "md5": "21232f297a57a5a743894a0e4a801fc3",
+    "mid": "/u/4d94501d1f78ac091dbc9b4d",
+    "n": "adrien joly",
     "name": "Adrien Joly",
     "pl": [
       {
@@ -407,6 +410,30 @@
         "url": "/u/4d94501d1f78ac091dbc9b4d/playlist/1"
       }
     ],
+    "pref": {
+      "emAcc": 0,
+      "emAdd": 0,
+      "emCom": 0,
+      "emFrd": 0,
+      "emLik": -1,
+      "emMen": 0,
+      "emRep": 0,
+      "emSam": 1,
+      "emSub": 0,
+      "hideBkAd": false,
+      "mnAcc": -1,
+      "mnAdd": -1,
+      "mnCom": -1,
+      "mnFrd": -1,
+      "mnLik": -1,
+      "mnMen": -1,
+      "mnRep": -1,
+      "mnSam": -1,
+      "mnSnp": -1,
+      "mnSnt": -1,
+      "mnSub": -1,
+      "pendEN": 0
+    },
     "pwd": "21232f297a57a5a743894a0e4a801fc3"
   },
   {

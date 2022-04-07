@@ -58,6 +58,7 @@ exports.actions = {
 
   deleteComment: commentModel.delete,
 
+  /** @param { { createPlaylist: import("../../domain/api").CreatePlaylist } } features */
   insert: async function (httpRequestParams, callback, _request, features) {
     const { createPlaylist } = features;
 
@@ -244,6 +245,7 @@ exports.handleRequest = function (request, reqParams, response, features) {
   else response.badRequest();
 };
 
+/** @param { { createPlaylist: import("../../domain/api").CreatePlaylist } } features */
 exports.controller = function (request, getParams, response, features) {
   //request.logToConsole("api.post", getParams);
   var params = snip.translateFields(getParams || {}, sequencedParameters);

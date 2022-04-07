@@ -169,11 +169,15 @@ function loadControllerFile({ name, appDir }) {
   return require(`${appDir}/${name.replace(/\./g, '/')}.js`);
 }
 
+const features = require('../../../domain/features');
+const userCollection = require('../../../infrastructure/userCollection');
+const _features = features(userCollection);
+
 // attaches a legacy controller to an Express app
 function attachLegacyRoute({ expressApp, method, path, controllerFile }) {
   expressApp[method](path, function endpointHandler(req, res) {
     req.mergedParams = { ...req.params, ...req.query };
-    return controllerFile.controller(req, req.mergedParams, res);
+    return controllerFile.controller(req, req.mergedParams, res, _features);
   });
 }
 

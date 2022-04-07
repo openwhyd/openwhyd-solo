@@ -9,12 +9,7 @@ var snip = require('../../snip.js');
 var mongodb = require('../../models/mongodb.js');
 var postModel = require('../../models/post.js');
 var commentModel = require('../../models/comment.js');
-const features = require('../../domain/features');
 var lastFm = require('./lastFm.js').lastFm;
-
-const userCollection = require('../../infrastructure/userCollection');
-
-const { createPlaylist } = features(userCollection);
 
 var sequencedParameters = { _1: 'pId', _2: 'action' }; //[null, "pId", "action"];
 
@@ -63,7 +58,9 @@ exports.actions = {
 
   deleteComment: commentModel.delete,
 
-  insert: async function (httpRequestParams, callback) {
+  insert: async function (httpRequestParams, callback, _request, features) {
+    const { createPlaylist } = features;
+
     var postRequest = {
       uId: httpRequestParams.uId,
       uNm: httpRequestParams.uNm,
@@ -210,7 +207,7 @@ exports.actions = {
   },
 };
 
-exports.handleRequest = function (request, reqParams, response) {
+exports.handleRequest = function (request, reqParams, response, features) {
   request.logToConsole('api.post.handleRequest', reqParams);
 
   function resultHandler(res, args) {
@@ -238,18 +235,23 @@ exports.handleRequest = function (request, reqParams, response) {
   if (!user || !user.id) return response.badRequest();
 
   if (reqParams.action && exports.actions[reqParams.action])
-    exports.actions[reqParams.action](reqParams, resultHandler, request);
+    exports.actions[reqParams.action](
+      reqParams,
+      resultHandler,
+      request,
+      features
+    );
   else response.badRequest();
 };
 
-exports.controller = function (request, getParams, response) {
+exports.controller = function (request, getParams, response, features) {
   //request.logToConsole("api.post", getParams);
   var params = snip.translateFields(getParams || {}, sequencedParameters);
 
   //if (request.method.toLowerCase() === 'post')
   for (let i in request.body) params[i] = request.body[i];
 
-  exports.handleRequest(request, params, response);
+  exports.handleRequest(request, params, response, features);
 };
 
 function hasValidPlaylistId(playlistRequest) {

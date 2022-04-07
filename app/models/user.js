@@ -426,27 +426,6 @@ exports.hasPlaylistNameByUid = function (uId, name, cb) {
   });
 };
 
-/**
- * @param {number} uId
- * @param {string} name
- * @param {(playlist: import("../domain/api").Playlist) => void} handler
- */
-exports.createPlaylist = function (uId, name, handler) {
-  // console.log('user.createPlaylist', uId, name);
-  fetch({ _id: uId }, function (err, user) {
-    user.pl = user.pl || [];
-    var pl = {
-      id: user.pl.length > 0 ? parseInt(user.pl[user.pl.length - 1].id) + 1 : 0,
-      name: name,
-    };
-    user.pl.push(pl);
-    exports.save(user, function () {
-      // console.log('created playlist:', pl.name, pl.id);
-      handler(pl);
-    });
-  });
-};
-
 exports.setPlaylist = function (uId, plId, upd, handler) {
   upd = upd || {};
   console.log('user.setPlaylist', uId, plId, upd);

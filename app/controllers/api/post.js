@@ -1,3 +1,5 @@
+// @ts-check
+
 /**
  * api endpoint for posts
  * @author adrienjoly, whyd
@@ -6,7 +8,6 @@
 var snip = require('../../snip.js');
 var mongodb = require('../../models/mongodb.js');
 var postModel = require('../../models/post.js');
-var userModel = require('../../models/user.js');
 var commentModel = require('../../models/comment.js');
 var lastFm = require('./lastFm.js').lastFm;
 
@@ -57,18 +58,18 @@ exports.actions = {
 
   deleteComment: commentModel.delete,
 
-  insert: function (p, callback) {
-    var q = {
-      uId: p.uId,
-      uNm: p.uNm,
-      text: p.text || '',
+  insert: async function (requestParams, callback, _whatever, features) {
+    var postRequest = {
+      uId: requestParams.uId,
+      uNm: requestParams.uNm,
+      text: requestParams.text || '',
       pl: undefined, // to be parsed/populated before calling actualInsert()
       // fields that will be ignored by rePost():
-      name: p.name,
-      eId: p.eId,
+      name: requestParams.name,
+      eId: requestParams.eId,
     };
 
-    if (p.ctx) q.ctx = p.ctx;
+    if (requestParams.ctx) postRequest.ctx = requestParams.ctx;
 
     function tryJsonParse(p) {
       try {
@@ -79,53 +80,53 @@ exports.actions = {
     }
 
     function actualInsert() {
-      if (p.pId) postModel.rePost(p.pId, q, callback);
+      if (requestParams.pId)
+        postModel.rePost(requestParams.pId, postRequest, callback);
       else {
-        if (p._id)
+        if (requestParams._id)
           // edit mode
-          q._id = p._id;
+          postRequest._id = requestParams._id;
 
-        if (p.img && p.img != 'null') q.img = p.img;
+        if (requestParams.img && requestParams.img != 'null')
+          postRequest.img = requestParams.img;
 
-        if (p.src)
+        if (requestParams.src)
           // source webpage of the content: {id,name} provided by bookmarklet
-          q.src = typeof p.src == 'object' ? p.src : tryJsonParse(p.src);
-        else if (p['src[id]'] && p['src[name]'])
-          q.src = {
-            id: p['src[id]'],
-            name: p['src[name]'],
+          postRequest.src =
+            typeof requestParams.src == 'object'
+              ? requestParams.src
+              : tryJsonParse(requestParams.src);
+        else if (requestParams['src[id]'] && requestParams['src[name]'])
+          postRequest.src = {
+            id: requestParams['src[id]'],
+            name: requestParams['src[name]'],
           };
-        if (!q.src || !q.src.id) delete q.src;
+        if (!postRequest.src || !postRequest.src.id) delete postRequest.src;
 
-        postModel.savePost(q, callback);
+        postModel.savePost(postRequest, callback);
       }
     }
 
-    // process playlist
-    try {
-      q.pl = typeof p.pl == 'object' ? p.pl : JSON.parse(p.pl);
-    } catch (e) {
-      q.pl = {
-        id: p['pl[id]'],
-        name: p['pl[name]'],
-      };
-    }
-    if (q.pl.id == 'create') {
-      userModel.createPlaylist(p.uId, q.pl.name, function (playlist) {
-        if (playlist) {
-          q.pl.id = playlist.id;
-          // console.log('playlist was created', q.pl);
-        }
-        actualInsert();
-      });
-      return; // avoid inserting twice
+    // Pure function
+    postRequest.pl = parsePlaylistRequest(requestParams);
+
+    if (needToCreatePlaylist(postRequest)) {
+      const playlist = await features.createPlaylist(
+        requestParams.uId,
+        postRequest.pl.name
+      );
+
+      if (playlist) {
+        postRequest.pl.id = playlist.id;
+      }
     } else {
-      q.pl.id = parseInt(q.pl.id);
-      if (isNaN(q.pl.id)) delete q.pl; //q.pl = null;
+      postRequest.pl.id = parseInt(postRequest.pl.id);
+      if (isNaN(postRequest.pl.id)) delete postRequest.pl; //q.pl = null;
     }
 
     actualInsert();
   },
+
   delete: function (p, callback) {
     postModel.deletePost(
       p._id,
@@ -207,7 +208,7 @@ exports.actions = {
   },
 };
 
-exports.handleRequest = function (request, reqParams, response) {
+exports.handleRequest = function (request, reqParams, response, features) {
   request.logToConsole('api.post.handleRequest', reqParams);
 
   function resultHandler(res, args) {
@@ -235,16 +236,37 @@ exports.handleRequest = function (request, reqParams, response) {
   if (!user || !user.id) return response.badRequest();
 
   if (reqParams.action && exports.actions[reqParams.action])
-    exports.actions[reqParams.action](reqParams, resultHandler, request);
+    exports.actions[reqParams.action](
+      reqParams,
+      resultHandler,
+      request,
+      features
+    );
   else response.badRequest();
 };
 
-exports.controller = function (request, getParams, response) {
+exports.controller = function (request, getParams, response, features) {
   //request.logToConsole("api.post", getParams);
   var params = snip.translateFields(getParams || {}, sequencedParameters);
 
   //if (request.method.toLowerCase() === 'post')
   for (let i in request.body) params[i] = request.body[i];
 
-  exports.handleRequest(request, params, response);
+  exports.handleRequest(request, params, response, features);
 };
+function needToCreatePlaylist(postRequest) {
+  return postRequest.pl.id == 'create';
+}
+
+function parsePlaylistRequest(requestParams) {
+  try {
+    return typeof requestParams.pl == 'object'
+      ? requestParams.pl
+      : JSON.parse(requestParams.pl);
+  } catch (e) {
+    return {
+      id: requestParams['pl[id]'],
+      name: requestParams['pl[name]'],
+    };
+  }
+}

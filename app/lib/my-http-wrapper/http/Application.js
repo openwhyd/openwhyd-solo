@@ -173,7 +173,9 @@ function loadControllerFile({ name, appDir }) {
 function attachLegacyRoute({ expressApp, method, path, controllerFile }) {
   expressApp[method](path, function endpointHandler(req, res) {
     req.mergedParams = { ...req.params, ...req.query };
-    return controllerFile.controller(req, req.mergedParams, res);
+    const userCollection = require('../../../infrastructure/userCollection.js');
+    const features = require('../../../domain/features.js')(userCollection);
+    return controllerFile.controller(req, req.mergedParams, res, features);
   });
 }
 

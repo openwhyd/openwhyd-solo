@@ -170,14 +170,25 @@ function loadControllerFile({ name, appDir }) {
 }
 
 // attaches a legacy controller to an Express app
-function attachLegacyRoute({ expressApp, method, path, controllerFile }) {
+function attachLegacyRoute({
+  expressApp,
+  method,
+  path,
+  controllerFile,
+  features,
+}) {
   expressApp[method](path, function endpointHandler(req, res) {
     req.mergedParams = { ...req.params, ...req.query };
-    return controllerFile.controller(req, req.mergedParams, res);
+    return controllerFile.controller(req, req.mergedParams, res, features);
   });
 }
 
 function attachLegacyRoutesFromFile(expressApp, appDir, routeFile) {
+  const { createFeatures } = require('../../../domain/features.js');
+  const {
+    userCollection,
+  } = require('../../../infrastructure/userCollection.js');
+  const features = createFeatures(userCollection);
   loadRoutesFromFile(routeFile).forEach(({ pattern, name }) => {
     const { method, path } = parseExpressRoute({ pattern, name });
     attachLegacyRoute({
@@ -185,6 +196,7 @@ function attachLegacyRoutesFromFile(expressApp, appDir, routeFile) {
       method,
       path,
       controllerFile: loadControllerFile({ name, appDir }),
+      features,
     });
   });
 }

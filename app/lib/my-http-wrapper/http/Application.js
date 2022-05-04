@@ -116,7 +116,12 @@ exports.Application = class Application {
     app.use(makeBodyParser(this._uploadSettings)); // parse uploads and arrays from query params
     this._sessionMiddleware && app.use(this._sessionMiddleware);
     app.use(makeStatsUpdater());
-    attachLegacyRoutesFromFile(app, this._appDir, this._routeFile);
+    const { createFeatures } = require('../../../domain/features');
+    const {
+      userCollection,
+    } = require('../../../infrastructure/userCollection');
+    const features = createFeatures(userCollection);
+    attachLegacyRoutesFromFile(app, this._appDir, this._routeFile, features);
     app.use(makeNotFound(this._errorHandler));
     return (this._expressApp = app);
   }
@@ -170,17 +175,24 @@ function loadControllerFile({ name, appDir }) {
 }
 
 // attaches a legacy controller to an Express app
-function attachLegacyRoute({ expressApp, method, path, controllerFile }) {
+function attachLegacyRoute({
+  expressApp,
+  method,
+  path,
+  controllerFile,
+  features,
+}) {
   expressApp[method](path, function endpointHandler(req, res) {
     req.mergedParams = { ...req.params, ...req.query };
-    return controllerFile.controller(req, req.mergedParams, res);
+    return controllerFile.controller(req, req.mergedParams, res, features);
   });
 }
 
-function attachLegacyRoutesFromFile(expressApp, appDir, routeFile) {
+function attachLegacyRoutesFromFile(expressApp, appDir, routeFile, features) {
   loadRoutesFromFile(routeFile).forEach(({ pattern, name }) => {
     const { method, path } = parseExpressRoute({ pattern, name });
     attachLegacyRoute({
+      features,
       expressApp,
       method,
       path,

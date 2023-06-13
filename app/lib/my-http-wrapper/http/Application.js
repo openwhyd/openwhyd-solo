@@ -3,6 +3,8 @@ const http = require('http');
 const express = require('express');
 const formidable = require('formidable');
 const qset = require('q-set'); // instead of body-parser, for form fields with brackets
+const { createFeatures } = require('../../../domain/features.js');
+const { userCollection } = require('../../../infrastructure/userCollection.js');
 
 const LOG_THRESHOLD = process.env.LOG_REQ_THRESHOLD_MS || 500;
 
@@ -170,21 +172,29 @@ function loadControllerFile({ name, appDir }) {
 }
 
 // attaches a legacy controller to an Express app
-function attachLegacyRoute({ expressApp, method, path, controllerFile }) {
+function attachLegacyRoute({
+  expressApp,
+  method,
+  path,
+  controllerFile,
+  features,
+}) {
   expressApp[method](path, function endpointHandler(req, res) {
     req.mergedParams = { ...req.params, ...req.query };
-    return controllerFile.controller(req, req.mergedParams, res);
+    return controllerFile.controller(req, req.mergedParams, res, features);
   });
 }
 
 function attachLegacyRoutesFromFile(expressApp, appDir, routeFile) {
   loadRoutesFromFile(routeFile).forEach(({ pattern, name }) => {
     const { method, path } = parseExpressRoute({ pattern, name });
+    const features = createFeatures(userCollection);
     attachLegacyRoute({
       expressApp,
       method,
       path,
       controllerFile: loadControllerFile({ name, appDir }),
+      features,
     });
   });
 }
